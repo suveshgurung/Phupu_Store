@@ -3,9 +3,9 @@ import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'luc
 
 export default function Footer() {
   return (
-    <footer className="w-full flex flex-col bottom-0 items-center justify-around border-gray-200 border-t shadow-lg">
+    <footer className="w-full bg-gray-100 flex flex-col bottom-0 items-center justify-around border-gray-200 border-t shadow-lg">
       {/* Main footer content - Contact and Social sections */}
-      <div className="w-full px-4 md:px-8 py-8 md:py-12 flex flex-col md:flex-row">
+      <div className="w-full px-4 md:px-8 py-6 flex flex-col md:flex-row">
         {/* Contact Details Section */}
         <div className="w-full md:w-1/2 mb-8 md:mb-0 md:pr-8 flex flex-col items-center">
           <h3 className="text-lg md:text-xl font-bold mb-4">Contact Us</h3>
@@ -20,7 +20,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center justify-center space-x-3">
               <MapPin className="text-gray-600 w-5 h-5 md:w-6 md:h-6" />
-              <span className="text-sm md:text-base">123 Food Street, Culinary City, FC 12345</span>
+              <span className="text-sm md:text-base">Bharatpur 11, Chitwan, Nepal</span>
             </div>
           </div>
         </div>
@@ -46,7 +46,7 @@ export default function Footer() {
       </div>
       
       {/* Copyright Section */}
-      <div className="w-full bg-gray-100 py-4 text-center">
+      <div className="w-full py-4 text-center">
         <p className="text-xs md:text-sm text-gray-600 px-4">
           © 2025 Big Food Industries. All Rights Reserved.
         </p>

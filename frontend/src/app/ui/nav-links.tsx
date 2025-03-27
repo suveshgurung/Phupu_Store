@@ -52,7 +52,7 @@ export default function Navlinks() {
               key={link.name}
               href={link.href}
               className={clsx(
-                "h-[38px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium hover:bg-gray-200 md:flex-none md:justify-start md:p-2 md:px-3"
+                "h-[38px] grow items-center justify-center gap-2 rounded-md p-3 text-md font-medium hover:bg-gray-200 md:flex-none md:justify-start md:p-2 md:px-3"
               )}
             >
               {link.name}
@@ -67,7 +67,7 @@ export default function Navlinks() {
               key={link.name}
               href={link.href}
               className={clsx(
-                "h-[38px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium md:flex-none md:justify-start md:p-2 md:px-3",
+                "h-[38px] grow items-center justify-center gap-2 rounded-md p-3 text-md font-medium md:flex-none md:justify-start md:p-2 md:px-3",
                 {
                   'bg-[#c52128] text-white hover:bg-red-700': link.name === "Login",
                   'bg-[#f5b400] text-white hover:bg-yellow-500': link.name === "Sign Up",
