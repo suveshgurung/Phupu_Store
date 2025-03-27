@@ -23,8 +23,8 @@ export default function Navlinks() {
           className={clsx(
             "hidden md:flex h-[38px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium hover:bg-[#e06d3d] md:flex-none md:justify-start md:p-2 md:px-3",
             {
-              'bg-brand-red text-white hover:bg-red-700': link.name === "Login",
-              'bg-brand-yellow text-white hover:bg-yellow-500': link.name === "Sign Up",
+              'bg-[#c52128] text-white hover:bg-red-700': link.name === "Login",
+              'bg-[#f5b400] text-white hover:bg-yellow-500': link.name === "Sign Up",
             },
           )}
           >
