@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx'
 
@@ -40,6 +40,17 @@ const links: Navlinks[] = [
 
 export default function Navlinks() {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    if (isDrawerOpen) {
+      document.body.classList.add('nav-open');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('nav-open');
+      document.body.style.overflow = 'auto';
+    }
+  }, [isDrawerOpen]);
 
   return (
     <div className="relative md:w-[70%]">
@@ -103,7 +114,7 @@ export default function Navlinks() {
       </button>
       
       <div className={clsx(
-        "fixed inset-0 z-50 transition-opacity duration-300 md:hidden",
+        "fixed inset-0 z-[9990] transition-opacity duration-300 md:hidden",
         {
           "opacity-0 pointer-events-none": !isDrawerOpen,
           "opacity-100": isDrawerOpen,
@@ -111,13 +122,13 @@ export default function Navlinks() {
       )}>
         {/* Backdrop */}
         <div 
-          className="absolute inset-0 bg-transparent"
+          className="absolute inset-0 bg-white/60"
           onClick={() => setIsDrawerOpen(false)}
         />
         
         {/* Sidebar Content */}
         <div className={clsx(
-          "absolute top-0 left-0 h-screen w-64 bg-white/80 backdrop-blur-sm transform transition-transform duration-300 ease-in-out",
+          "fixed left-0 top-0 h-full w-64 bg-white/60 transform transition-transform duration-300 ease-in-out z-[9990]",
           {
             "-translate-x-full": !isDrawerOpen,
             "translate-x-0": isDrawerOpen,
@@ -144,15 +155,14 @@ export default function Navlinks() {
                 />
               </svg>
             </button>
-            <hr />
             
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-2 mt-4">
               {links.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
                   className={clsx(
-                    "w-full px-4 py-3 text-left rounded-md transition-colors duration-200",
+                    "w-full px-4 py-3 text-left rounded-md transition-colors duration-200 hover:bg-gray-200",
                     {
                       'mt-5': link.name === "Home",
                     }

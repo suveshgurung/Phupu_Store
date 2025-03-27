@@ -17,3 +17,17 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Add blur effect to main content when nav is open */
+body.nav-open main {
+  filter: blur(8px);
+  opacity: 0.5;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Ensure form elements don't have higher z-index */
+body.nav-open main * {
+  z-index: auto !important;
+  position: static !important;
+}
