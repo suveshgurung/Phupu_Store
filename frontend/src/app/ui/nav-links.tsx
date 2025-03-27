@@ -7,16 +7,34 @@ import clsx from 'clsx'
 interface Navlinks {
   name: string,
   href: string,
+  group: "main" | "auth",
 };
 
 const links: Navlinks[] = [
   {
+    name: "Home",
+    href: "/",
+    group: "main",
+  },
+  {
+    name: "About Us",
+    href: "/",
+    group: "main",
+  },
+  {
+    name: "Contact Us",
+    href: "/",
+    group: "main",
+  },
+  {
     name: "Login",
     href: "/login",
+    group: "auth",
   },
   {
     name: "Sign Up",
     href: "/signup",
+    group: "auth",
   }
 ];
 
@@ -24,27 +42,42 @@ export default function Navlinks() {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   return (
-    <div className="relative">
+    <div className="relative md:w-[70%]">
       {/* For desktop */}
-      <div className="flex flex-row justify-center gap-4">
-        {links.map((link) => {
-          return (
+      <div className="hidden md:flex flex-row justify-around gap-4">
+        {/* Main group */}
+        <div className="flex space-x-4">
+          {links.filter(link => link.group === "main").map((link) => (
             <Link
-            key={link.name}
-            href={link.href}
-            className={clsx(
-              "hidden md:flex h-[38px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium hover:bg-[#e06d3d] md:flex-none md:justify-start md:p-2 md:px-3",
-              {
-                'bg-[#c52128] text-white hover:bg-red-700': link.name === "Login",
-                'bg-[#f5b400] text-white hover:bg-yellow-500': link.name === "Sign Up",
-              },
-            )}
+              key={link.name}
+              href={link.href}
+              className={clsx(
+                "h-[38px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium hover:bg-gray-200 md:flex-none md:justify-start md:p-2 md:px-3"
+              )}
             >
-            <p className="hidden md:block">{link.name}</p>
+              {link.name}
             </Link>
-          )
+          ))}
+        </div>
 
-        })}
+        {/* Authentication group */}
+        <div className="flex space-x-4">
+          {links.filter(link => link.group === "auth").map((link) => (
+            <Link
+              key={link.name}
+              href={link.href}
+              className={clsx(
+                "h-[38px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium md:flex-none md:justify-start md:p-2 md:px-3",
+                {
+                  'bg-[#c52128] text-white hover:bg-red-700': link.name === "Login",
+                  'bg-[#f5b400] text-white hover:bg-yellow-500': link.name === "Sign Up",
+                }
+              )}
+            >
+              {link.name}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* For mobiles */}
@@ -78,13 +111,13 @@ export default function Navlinks() {
       )}>
         {/* Backdrop */}
         <div 
-          className="absolute inset-0 bg-black/50"
+          className="absolute inset-0 bg-transparent"
           onClick={() => setIsDrawerOpen(false)}
         />
         
         {/* Sidebar Content */}
         <div className={clsx(
-          "relative h-screen w-64 bg-white transform transition-transform duration-300 ease-in-out",
+          "absolute top-0 left-0 h-screen w-64 bg-white/80 backdrop-blur-sm transform transition-transform duration-300 ease-in-out",
           {
             "-translate-x-full": !isDrawerOpen,
             "translate-x-0": isDrawerOpen,
@@ -121,7 +154,7 @@ export default function Navlinks() {
                   className={clsx(
                     "w-full px-4 py-3 text-left rounded-md transition-colors duration-200",
                     {
-                      'mt-5': link.name === "Login",
+                      'mt-5': link.name === "Home",
                     }
                   )}
                   onClick={() => setIsDrawerOpen(false)}
