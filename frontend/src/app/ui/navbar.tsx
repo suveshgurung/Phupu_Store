@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function Navbar() {
   return(
-    <header className='h-full flex flex-row justify-around items-center py-4 bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm'>
+    <header className='sticky top-0 left-0 w-full flex flex-row justify-around items-center py-4 bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-md'>
       <Link
       href="/"
       className="md:w-[30%] pl-[5%]"
