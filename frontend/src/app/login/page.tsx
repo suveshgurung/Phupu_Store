@@ -3,19 +3,17 @@
 import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
 
-interface AuthFormData {
-  email: string;
+interface LoginFormData {
+  emailOrPhoneNumber: string;
   password: string;
-  phoneNumber: string;
 }
 
-export default function Authentication(): React.ReactElement {
+export default function Login(): React.ReactElement {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [formData, setFormData] = useState<AuthFormData>({
-    email: '',
+  const [formData, setFormData] = useState<LoginFormData>({
+    emailOrPhoneNumber: '',
     password: '',
-    phoneNumber: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,7 +32,7 @@ export default function Authentication(): React.ReactElement {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-8 md:mt-16 p-4">
+    <div className="max-w-lg mx-auto mt-14 md:mt-20 p-4">
       <h1 className="md:text-3xl text-2xl text-center font-semibold my-7">
         Welcome
       </h1>
@@ -44,18 +42,10 @@ export default function Authentication(): React.ReactElement {
       <form onSubmit={handleSubmit} className="flex flex-col mt-6 gap-4 text-base md:text-sm">
         <input 
           type="text"
-          placeholder="Email"
+          placeholder="Email or phone number"
           className="outline-none border border-slate-400 h-12 py-3 md:py-2 px-3 rounded-lg"
-          id="email"
-          value={formData.email}
-          onChange={handleInputChange}
-        />
-        <input 
-          type="text"
-          placeholder="Phone Number"
-          className="outline-none border border-slate-400 h-12 py-3 md:py-2 px-3 rounded-lg"
-          id="phoneNumber"
-          value={formData.phoneNumber}
+          id="emailOrPhoneNumber"
+          value={formData.emailOrPhoneNumber}
           onChange={handleInputChange}
         />
         <div className="relative">
