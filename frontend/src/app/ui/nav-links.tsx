@@ -114,7 +114,7 @@ export default function Navlinks() {
       </button>
       
       <div className={clsx(
-        "fixed inset-0 z-[9990] transition-opacity duration-300 md:hidden",
+        "fixed inset-0 z-50 transition-opacity duration-300 md:hidden",
         {
           "opacity-0 pointer-events-none": !isDrawerOpen,
           "opacity-100": isDrawerOpen,
@@ -128,7 +128,7 @@ export default function Navlinks() {
         
         {/* Sidebar Content */}
         <div className={clsx(
-          "fixed left-0 top-0 h-full w-64 bg-white/60 transform transition-transform duration-300 ease-in-out z-[9990]",
+          "fixed left-0 top-0 h-full w-64 bg-white/60 transform transition-transform duration-300 ease-in-out z-50",
           {
             "-translate-x-full": !isDrawerOpen,
             "translate-x-0": isDrawerOpen,
