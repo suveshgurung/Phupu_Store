@@ -2,6 +2,8 @@
 
 import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import clsx from 'clsx';
+import validator from 'validator';
 
 interface SignupFormData {
   fullName: string;
@@ -15,6 +17,9 @@ export default function SignUp(): React.ReactElement {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [emailError, setEmailError] = useState<string>('');
+  const [phoneNumberError, setPhoneNumberError] = useState<string>('');
+  const [passwordError, setPasswordError] = useState<string>('');
   const [formData, setFormData] = useState<SignupFormData>({
     fullName: '',
     email: '',
@@ -33,7 +38,40 @@ export default function SignUp(): React.ReactElement {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setEmailError('');
+    setPhoneNumberError('');
+    setPasswordError('');
     setLoading(true);
+    let error: boolean = false;
+
+    if (!validator.isEmail(formData.email)) {
+      setLoading(false);
+      setEmailError("Invalid email!");
+      error = true;
+    }
+    if (!validator.isNumeric(formData.phoneNumber)) {
+      setLoading(false);
+      setPhoneNumberError("Invalid phone number!");
+      error = true;
+    }
+    else {
+      if (formData.phoneNumber.length != 10) {
+        setLoading(false);
+        setPhoneNumberError("Phone number should contain 10 digits!");
+        error = true;
+      }
+    }
+    if (formData.password != formData.confirmPassword) {
+      setLoading(false);
+      setPasswordError("Passwords do not match!");
+      error = true;
+    }
+
+    if (error) {
+      return;
+    }
+
+    // TODO: signup backend login connect.
 
     console.log(formData);
   };
@@ -47,38 +85,62 @@ export default function SignUp(): React.ReactElement {
         Login to your account or create a new one
       </p>
       <form onSubmit={handleSubmit} className="flex flex-col mt-6 gap-4 text-base md:text-sm">
-        <input 
+        <input
           type="text"
           placeholder="Full name"
           className="outline-none border border-slate-400 h-12 py-3 md:py-2 px-3 rounded-lg"
           id="fullName"
           value={formData.fullName}
           onChange={handleInputChange}
+          required
         />
-        <input 
+        <input
           type="text"
           placeholder="Email"
           className="outline-none border border-slate-400 h-12 py-3 md:py-2 px-3 rounded-lg"
           id="email"
           value={formData.email}
           onChange={handleInputChange}
+          required
         />
-        <input 
+        <div
+          className={clsx(
+            "w-full text-red-700",
+            {
+              "hidden": !emailError
+            }
+          )}
+        >
+          {emailError}
+        </div>
+        <input
           type="text"
           placeholder="Phone number"
           className="outline-none border border-slate-400 h-12 py-3 md:py-2 px-3 rounded-lg"
           id="phoneNumber"
           value={formData.phoneNumber}
           onChange={handleInputChange}
+          required
         />
+        <div
+          className={clsx(
+            "w-full text-red-700",
+            {
+              "hidden": !phoneNumberError
+            }
+          )}
+        >
+          {phoneNumberError}
+        </div>
         <div className="relative">
-          <input 
+          <input
             type={showPassword ? "text" : "password"}
-            placeholder="Password" 
+            placeholder="Password"
             className="w-full outline-none border border-slate-400 h-12 py-3 md:py-2 px-3 rounded-lg pr-10"
-            id="password" 
+            id="password"
             value={formData.password}
             onChange={handleInputChange}
+            required
           />
           <button
             type="button"
@@ -93,13 +155,14 @@ export default function SignUp(): React.ReactElement {
           </button>
         </div>
         <div className="relative">
-          <input 
+          <input
             type={showConfirmPassword ? "text" : "password"}
-            placeholder="Confirm password" 
+            placeholder="Confirm password"
             className="w-full outline-none border border-slate-400 h-12 py-3 md:py-2 px-3 rounded-lg pr-10"
-            id="confirmPassword" 
+            id="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleInputChange}
+            required
           />
           <button
             type="button"
@@ -112,6 +175,16 @@ export default function SignUp(): React.ReactElement {
               <i className="bi bi-eye-slash"></i>
             )}
           </button>
+        </div>
+        <div
+          className={clsx(
+            "w-full text-red-700",
+            {
+              "hidden": !passwordError
+            }
+          )}
+        >
+          {passwordError}
         </div>
         <button
           disabled={loading}

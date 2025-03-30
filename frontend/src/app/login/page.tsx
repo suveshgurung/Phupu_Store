@@ -2,6 +2,8 @@
 
 import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import validator from 'validator';
+import clsx from 'clsx';
 
 interface LoginFormData {
   emailOrPhoneNumber: string;
@@ -10,6 +12,8 @@ interface LoginFormData {
 
 export default function Login(): React.ReactElement {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [emailAndPhoneNumberError, setEmailAndPhoneNumberError] = useState<string>('');
+  const [passwordError, setPasswordError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<LoginFormData>({
     emailOrPhoneNumber: '',
@@ -26,7 +30,29 @@ export default function Login(): React.ReactElement {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setEmailAndPhoneNumberError('');
+    setPasswordError('');
     setLoading(true);
+
+    if (validator.isNumeric(formData.emailOrPhoneNumber)) {
+      if (formData.emailOrPhoneNumber.length != 10) {
+        setLoading(false);
+        setEmailAndPhoneNumberError("Phone number should contain 10 digits!");
+
+        return;
+      }
+      // TODO: Backend login with phone number as data.
+    }
+    else {
+      if (!validator.isEmail(formData.emailOrPhoneNumber)) {
+        setLoading(false);
+        setEmailAndPhoneNumberError("Invalid email!");
+
+        return;
+      }
+      // TODO: Backend login with email as data.
+    }
+    setLoading(false);
     
     console.log(formData);
   };
@@ -47,7 +73,18 @@ export default function Login(): React.ReactElement {
           id="emailOrPhoneNumber"
           value={formData.emailOrPhoneNumber}
           onChange={handleInputChange}
+          required
         />
+        <div
+          className={clsx(
+            "w-full text-red-700",
+            {
+              "hidden": !emailAndPhoneNumberError
+            }
+          )}
+        >
+          {emailAndPhoneNumberError}
+        </div>
         <div className="relative">
           <input 
             type={showPassword ? "text" : "password"}
@@ -56,6 +93,7 @@ export default function Login(): React.ReactElement {
             id="password" 
             value={formData.password}
             onChange={handleInputChange}
+            required
           />
           <button
             type="button"
@@ -68,6 +106,16 @@ export default function Login(): React.ReactElement {
               <i className="bi bi-eye-slash"></i>
             )}
           </button>
+        </div>
+        <div
+          className={clsx(
+            "w-full text-red-700",
+            {
+              "hidden": !passwordError
+            }
+          )}
+        >
+          {passwordError}
         </div>
         <button
           disabled={loading}
