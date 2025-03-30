@@ -34,7 +34,7 @@ export default function Authentication(): React.ReactElement {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-16 p-4">
+    <div className="max-w-lg mx-auto mt-8 md:mt-16 p-4">
       <h1 className="md:text-3xl text-2xl text-center font-semibold my-7">
         Welcome
       </h1>
