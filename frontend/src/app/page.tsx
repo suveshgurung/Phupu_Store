@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Search, Sliders, ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import HeroSection from '@/app/ui/hero-section';
 
 // Food item type definition
@@ -136,7 +136,6 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20]);
-  const [showFilters, setShowFilters] = useState(false);
   const [showPopularOnly, setShowPopularOnly] = useState(false);
   
   // Get unique categories for filter dropdown
@@ -200,145 +199,135 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       
-      {/* Filter and Menu Section */}
+      {/* New Two-Column Layout for Filters and Menu */}
       <section className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h2 className="text-2xl md:text-3xl font-bold">Our Menu</h2>
-          
-          <div className="flex items-center mt-4 md:mt-0 space-x-4">
-            <div className="flex items-center">
-              <button 
-                onClick={() => setShowPopularOnly(!showPopularOnly)}
-                className={`px-4 py-2 rounded-full text-sm ${
-                  showPopularOnly 
-                    ? 'bg-red-600 text-white' 
-                    : 'bg-gray-200 text-gray-700'
-                }`}
-              >
-                Popular Items
-              </button>
-            </div>
-            
-            <div className="relative">
-              <button 
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-200 rounded-full text-gray-700 hover:bg-gray-300"
-              >
-                <Sliders size={16} />
-                <span className="text-sm">Filters</span>
-              </button>
+        <h2 className="text-2xl md:text-3xl font-bold mb-6">Our Menu</h2>
+        
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Left Sidebar - Category Filters */}
+          <div className="w-full md:w-1/4 lg:w-1/5">
+            <div className="bg-white rounded-lg shadow-md p-4">
+              <h3 className="font-semibold text-lg mb-4">Categories</h3>
               
-              {showFilters && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl z-10 p-4">
-                  <h3 className="font-medium mb-3">Categories</h3>
-                  <select 
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full p-2 border rounded mb-4"
-                  >
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                  
-                  <h3 className="font-medium mb-3">Price Range</h3>
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span>${priceRange[0]}</span>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="20" 
-                      step="1"
-                      value={priceRange[0]}
-                      onChange={(e) => setPriceRange([parseInt(e.target.value), priceRange[1]])}
-                      className="w-full"
+              <div className="space-y-2">
+                {categories.map((category) => (
+                  <label key={category} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="category"
+                      value={category}
+                      checked={selectedCategory === category}
+                      onChange={() => setSelectedCategory(category)}
+                      className="form-radio h-4 w-4 text-red-600"
                     />
-                    <span>${priceRange[1]}</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="20" 
-                    step="1"
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                    className="w-full mb-4"
-                  />
-                  
-                  <button 
-                    onClick={() => {
-                      setSelectedCategory('All');
-                      setPriceRange([0, 20]);
-                      setShowPopularOnly(false);
-                      setShowFilters(false);
-                    }}
-                    className="w-full py-2 text-center text-sm text-red-600 hover:text-red-800"
-                  >
-                    Reset Filters
-                  </button>
+                    <span className="text-gray-700">{category}</span>
+                  </label>
+                ))}
+              </div>
+              
+              <div className="mt-6">
+                <h3 className="font-semibold text-lg mb-4">Price Range</h3>
+                <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <span>${priceRange[0]}</span>
+                  <span>${priceRange[1]}</span>
                 </div>
-              )}
+                <input
+                  type="range"
+                  min="0"
+                  max="20"
+                  step="1"
+                  value={priceRange[1]}
+                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="mt-6">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showPopularOnly}
+                    onChange={() => setShowPopularOnly(!showPopularOnly)}
+                    className="form-checkbox h-4 w-4 text-red-600"
+                  />
+                  <span className="text-gray-700">Popular Items Only</span>
+                </label>
+              </div>
+              
+              <button
+                onClick={() => {
+                  setSelectedCategory('All');
+                  setPriceRange([0, 20]);
+                  setShowPopularOnly(false);
+                  setSearchTerm('');
+                }}
+                className="mt-6 w-full py-2 text-sm text-red-600 border border-red-600 rounded-md hover:bg-red-50"
+              >
+                Reset Filters
+              </button>
             </div>
+          </div>
+          
+          {/* Right Content - Food Items Grid */}
+          <div className="w-full md:w-3/4 lg:w-4/5">
+            {filteredItems.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredItems.map((item) => (
+                  <div 
+                    key={item.id} 
+                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={item.imageUrl} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover"
+                      />
+                      {item.popular && (
+                        <span className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
+                          Popular
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-lg font-semibold">{item.name}</h3>
+                        <span className="text-red-600 font-medium">${item.price.toFixed(2)}</span>
+                      </div>
+                      <p className="text-gray-600 text-sm mt-2 line-clamp-2">{item.description}</p>
+                      <div className="mt-4 flex justify-between items-center">
+                        <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
+                          {item.category}
+                        </span>
+                        <button 
+                          onClick={() => addToCart(item)}
+                          className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-lg shadow-md">
+                <p className="text-gray-500 text-lg">No items found matching your criteria.</p>
+                <button 
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedCategory('All');
+                    setPriceRange([0, 20]);
+                    setShowPopularOnly(false);
+                  }}
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            )}
           </div>
         </div>
-        
-        {/* Food Items Grid */}
-        {filteredItems.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredItems.map((item) => (
-              <div 
-                key={item.id} 
-                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
-              >
-                <div className="relative h-48 overflow-hidden">
-                  <img 
-                    src={item.imageUrl} 
-                    alt={item.name} 
-                    className="w-full h-full object-cover"
-                  />
-                  {item.popular && (
-                    <span className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
-                      Popular
-                    </span>
-                  )}
-                </div>
-                <div className="p-4">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-semibold">{item.name}</h3>
-                    <span className="text-red-600 font-medium">${item.price.toFixed(2)}</span>
-                  </div>
-                  <p className="text-gray-600 text-sm mt-2 line-clamp-2">{item.description}</p>
-                  <div className="mt-4 flex justify-between items-center">
-                    <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
-                      {item.category}
-                    </span>
-                    <button 
-                      onClick={() => addToCart(item)}
-                      className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <p className="text-gray-500 text-lg">No items found matching your criteria.</p>
-            <button 
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('All');
-                setPriceRange([0, 20]);
-                setShowPopularOnly(false);
-              }}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              Reset Filters
-            </button>
-          </div>
-        )}
       </section>
       
       {/* Cart Button */}
