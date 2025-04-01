@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useReducer, ReactNode } from 'react';
 
 interface userInfo {
   id: number;
@@ -16,7 +16,7 @@ interface UserContextType {
   dispatch: (action: UserAction) => void;
 };
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+export const UserContext = createContext<UserContextType | undefined>(undefined);
 
 const UserReducer = (state: userInfo | null, action: UserAction): userInfo | null => {
   switch (action.type) {
@@ -37,14 +37,4 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </UserContext.Provider>
   );
-};
-
-export const useUserContext = () => {
-  const context = useContext(UserContext);
-
-  if (!context) {
-    throw new Error("useUserContext must be used within a UserProvider");
-  }
-
-  return context;
 };
