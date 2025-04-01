@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+'use client'
+
+import { createContext, useContext, useReducer, ReactNode } from 'react';
 
 interface userInfo {
   id: number;
@@ -7,29 +9,31 @@ interface userInfo {
   phoneNumber: string;
 };
 
+type UserAction = { type: "LOG_IN", payload: userInfo | null } | { type: "LOG_OUT" };
+
 interface UserContextType {
-  user?: userInfo;
-  updateUser: (type: string, user: userInfo) => void;
+  user: userInfo | null;
+  dispatch: (action: UserAction) => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<userInfo | undefined>(undefined);
-
-  const updateUser = (type: string, user?: userInfo) => {
-    switch (type) {
-      case "LOG_IN":
-        setUser(user);
-        break;
-      case "LOG_OUT":
-        setUser(undefined);
-        break;
-    }
+const UserReducer = (state: userInfo | null, action: UserAction): userInfo | null => {
+  switch (action.type) {
+    case "LOG_IN":
+      return action.payload;
+    case "LOG_OUT":
+      return null;
+    default:
+      return state;
   }
+};
+
+export const UserProvider = ({ children }: { children: ReactNode }) => {
+  const [user, dispatch] = useReducer(UserReducer, null);
 
   return (
-    <UserContext.Provider value={{ user, updateUser }}>
+    <UserContext.Provider value={{ user, dispatch }}>
       {children}
     </UserContext.Provider>
   );
