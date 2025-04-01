@@ -7,6 +7,7 @@ interface userInfo {
   name: string;
   email: string;
   phoneNumber: string;
+  profileImage?: string | null;
 };
 
 type UserAction = { type: "LOG_IN", payload: userInfo | null } | { type: "LOG_OUT" };

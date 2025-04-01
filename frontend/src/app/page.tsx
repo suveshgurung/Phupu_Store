@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart } from 'lucide-react';
+import Image from 'next/image';
 import HeroSection from '@/app/ui/hero-section';
 
 // Food item type definition
@@ -199,7 +200,7 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       
-      {/* New Two-Column Layout for Filters and Menu */}
+      {/* Filters and food menu section */}
       <section className="container mx-auto px-4 py-8">
         <h2 className="text-2xl md:text-3xl font-bold mb-6">Our Menu</h2>
         
@@ -278,7 +279,7 @@ export default function Home() {
                     className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
                   >
                     <div className="relative h-48 overflow-hidden">
-                      <img 
+                      <Image
                         src={item.imageUrl} 
                         alt={item.name} 
                         className="w-full h-full object-cover"
@@ -365,7 +366,11 @@ export default function Home() {
                   cart.map(cartItem => (
                     <div key={cartItem.item.id} className="flex items-center py-4 border-b">
                       <div className="w-16 h-16 rounded overflow-hidden mr-4">
-                        <img src={cartItem.item.imageUrl} alt={cartItem.item.name} className="w-full h-full object-cover" />
+                        <Image
+                          src={cartItem.item.imageUrl}
+                          alt={cartItem.item.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <div className="flex-grow">
                         <h3 className="font-medium">{cartItem.item.name}</h3>

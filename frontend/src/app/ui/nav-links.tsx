@@ -1,6 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import useUserContext from '@/app/hooks/use-user-context';
+import { FaUserCircle, FaSignOutAlt, FaUserEdit } from 'react-icons/fa';
+import Image from 'next/image';
 import Link from 'next/link';
 import clsx from 'clsx'
 
@@ -40,6 +43,22 @@ const links: Navlinks[] = [
 
 export default function Navlinks() {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { user } = useUserContext();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !(dropdownRef.current as HTMLElement).contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
@@ -51,6 +70,15 @@ export default function Navlinks() {
       document.body.style.overflow = 'auto';
     }
   }, [isDrawerOpen]);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleLogout = () => {
+    // TODO: Logout logic
+    setIsDropdownOpen(false);
+  };
 
   return (
     <div className="relative md:w-[70%]">
@@ -72,23 +100,74 @@ export default function Navlinks() {
         </div>
 
         {/* Authentication group */}
-        <div className="flex space-x-4">
-          {links.filter(link => link.group === "auth").map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className={clsx(
-                "h-[38px] grow items-center justify-center gap-2 rounded-md p-3 text-md font-medium md:flex-none md:justify-start md:p-2 md:px-3",
-                {
-                  'bg-[#c52128] text-white hover:bg-red-700': link.name === "Login",
-                  'bg-[#f5b400] text-white hover:bg-yellow-500': link.name === "Sign Up",
-                }
-              )}
+        {user ? (
+          <div className="relative" ref={dropdownRef}>
+            <button 
+              onClick={toggleDropdown}
+              className="flex items-center space-x-2 focus:outline-none"
+              aria-label="User menu"
             >
-              {link.name}
-            </Link>
-          ))}
-        </div>
+              <div className="w-10 h-10 rounded-full bg-white p-1 shadow-md transition-transform hover:scale-105 overflow-hidden">
+                {user?.profileImage ? (
+                  <Image
+                    src={user.profileImage}
+                    alt={`${user.name}'s profile`}
+                    className="w-full h-full object-cover rounded-full"
+                  />  
+                ) : (
+                  <FaUserCircle className="w-full h-full text-blue-600" />
+                )}
+              </div>
+              {user.name && (
+                <span className="text-white hidden md:block">{user.name}</span>
+              )}
+            </button>
+              
+            {/* Dropdown menu */}
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-10 transform transition-all duration-200 ease-in-out">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="text-sm font-medium text-gray-900">{user.name || 'User'}</p>
+                  <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                </div>
+                  
+                <Link 
+                  href="/profile/edit" 
+                  className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <FaUserEdit className="mr-3 text-blue-500" />
+                  Edit Profile
+                </Link>
+                  
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors"
+                >
+                  <FaSignOutAlt className="mr-3 text-red-500" />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>) : (
+          <div className="flex space-x-4">
+            {links.filter(link => link.group === "auth").map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={clsx(
+                  "h-[38px] grow items-center justify-center gap-2 rounded-md p-3 text-md font-medium md:flex-none md:justify-start md:p-2 md:px-3",
+                  {
+                    'bg-[#c52128] text-white hover:bg-red-700': link.name === "Login",
+                    'bg-[#f5b400] text-white hover:bg-yellow-500': link.name === "Sign Up",
+                  }
+                )}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* For mobiles */}
