@@ -1,12 +1,10 @@
+import ErrorCodes from './error-codes';
+
 class CustomError extends Error {
   statusCode: number;
-  errorCode: string;
-  // errorCode values:
-  // ER_UNEXP -> unexpected error
-  // ER_EMAIL_EXISTS -> provided email exists
-  // ER_PN_EXISTS -> provided phone number exists
+  errorCode: ErrorCodes;
 
-  constructor(statusCode: number, message: string, errorCode: string) {
+  constructor(statusCode: number, message: string, errorCode: ErrorCodes) {
     super(message);
     this.statusCode = statusCode;
     this.errorCode = errorCode;
