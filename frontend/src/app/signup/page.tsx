@@ -7,7 +7,7 @@ import validator from 'validator';
 import api from '@/app/utilities/api';
 import axios, { AxiosResponse } from 'axios';
 import ServerResponseData from '@/app/types/server-response';
-import ToastNotification from '@/app/types/toast-notification';
+import useToastContext from '@/app/hooks/use-toast-context';
 
 interface SignupFormData {
   full_name: string;
@@ -24,7 +24,7 @@ export default function SignUp(): React.ReactElement {
   const [emailError, setEmailError] = useState<string>('');
   const [phoneNumberError, setPhoneNumberError] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string>('');
-  const [toasts, setToasts] = useState<ToastNotification[]>([]);
+  const { showToast } = useToastContext();
   const [formData, setFormData] = useState<SignupFormData>({
     full_name: '',
     email: '',
@@ -32,16 +32,6 @@ export default function SignUp(): React.ReactElement {
     password: '',
     confirmPassword: '',
   });
-
-  const addToast = (message: string, type: 'success' | 'error') => {
-    const id = Date.now();
-    setToasts(prevToasts => [...prevToasts, { message, type, id }]);
-
-    // Remove the toast after 4 seconds.
-    setTimeout(() => {
-      setToasts(prevToasts => prevToasts.filter(toast => toast.id !== id));
-    }, 4000);
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -92,7 +82,7 @@ export default function SignUp(): React.ReactElement {
 
       if (responseData.success === true) {
         setLoading(false);
-        addToast("Sign up successful!", "success");
+        showToast("Sign up successful!", "success");
 
         setTimeout(() => {
           window.location.href = "/login";
@@ -103,14 +93,14 @@ export default function SignUp(): React.ReactElement {
       setLoading(false);
       if (axios.isAxiosError(error)) {
         if (error.response?.data.errorCode === "ER_EMAIL_EXISTS") {
-          addToast("Provided email already exists!", "error");
+          showToast("Provided email already exists!", "error");
         }
         else if (error.response?.data.errorCode === "ER_PN_EXISTS") {
-          addToast("Provided phone number already exists!", "error");
+          showToast("Provided phone number already exists!", "error");
         }
       }
       else {
-        addToast("An unexpected error occured!", "error");
+        showToast("An unexpected error occured!", "error");
       }
     }
 
@@ -240,24 +230,6 @@ export default function SignUp(): React.ReactElement {
         <Link href="/login">
           <span className="text-[#f59e0b]">Login</span>
         </Link>
-      </div>
-
-      {/* Toast notifications container */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={clsx(
-              "px-4 py-3 rounded-lg shadow-lg transform transition-all duration-500 animate-fadeIn",
-              {
-                "bg-red-500 text-white": toast.type === "error",
-                "bg-green-500 text-white": toast.type === "success"
-              }
-            )}
-          >
-            {toast.message}
-          </div>
-        ))}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 interface ToastNotification {
-  message: string;
-  type: 'success' | 'error';
   id: number;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'info';
 };
 
 export default ToastNotification;

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "@/app/ui/navbar";
 import Footer from "@/app/ui/footer";
 import { UserProvider } from "@/app/context/user-context";
+import { ToastProvider } from "@/app/context/toast-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -36,15 +37,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >
-        <UserProvider>
-          <div className='flex flex-col min-h-screen'>
-            <Navbar />
-            <main className="w-full flex-grow pt-[70px]">
-              {children}
-            </main>
-            <Footer />
-          </div>
-        </UserProvider>
+        <ToastProvider>
+          <UserProvider>
+            <div className='flex flex-col min-h-screen'>
+              <Navbar />
+              <main className="w-full flex-grow pt-[70px]">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </UserProvider>
+        </ToastProvider>
       </body>
     </html>
   );
