@@ -89,7 +89,7 @@ export default function SignUp(): React.ReactElement {
           type="text"
           placeholder="Full name"
           className="outline-none border border-slate-400 h-12 py-3 md:py-2 px-3 rounded-lg"
-          id="fullName"
+          id="name"
           value={formData.fullName}
           onChange={handleInputChange}
           required
@@ -117,7 +117,7 @@ export default function SignUp(): React.ReactElement {
           type="text"
           placeholder="Phone number"
           className="outline-none border border-slate-400 h-12 py-3 md:py-2 px-3 rounded-lg"
-          id="phoneNumber"
+          id="phone_number"
           value={formData.phoneNumber}
           onChange={handleInputChange}
           required

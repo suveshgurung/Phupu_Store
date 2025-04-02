@@ -280,6 +280,8 @@ export default function Home() {
                   >
                     <div className="relative h-48 overflow-hidden">
                       <Image
+                        width={300}
+                        height={300}
                         src={item.imageUrl} 
                         alt={item.name} 
                         className="w-full h-full object-cover"
@@ -367,6 +369,8 @@ export default function Home() {
                     <div key={cartItem.item.id} className="flex items-center py-4 border-b">
                       <div className="w-16 h-16 rounded overflow-hidden mr-4">
                         <Image
+                          width={200}
+                          height={200}
                           src={cartItem.item.imageUrl}
                           alt={cartItem.item.name}
                           className="w-full h-full object-cover"
