@@ -28,11 +28,13 @@ app.use('/api/auth', authRouter);
 const errorHandlerMiddleware: ErrorRequestHandler = (error: CustomError, req: Request, res: Response, next: NextFunction) => {
   const statusCode = error.statusCode || 500;
   const message = error.message || "Internal server error!";
+  const errorCode = error.errorCode || "ER_UNEXP";
 
   res.status(statusCode).json({
     success: false,
     statusCode: statusCode,
-    message: message
+    message: message,
+    errorCode: errorCode
   });
 };
 
