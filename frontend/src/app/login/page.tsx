@@ -4,20 +4,31 @@ import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import validator from 'validator';
 import clsx from 'clsx';
-
+import axios, { AxiosResponse } from 'axios';
+import api from '@/app/utilities/api';
+import ServerResponseData from '@/app/types/server-response';
+import useToastContext from '@/app/hooks/use-toast-context';
+import useUserContext from '@/app/hooks/use-user-context';
+import ErrorCodes from '@/app/types/error-codes';
+import UserInfo from '@/app/types/user-info';
+ 
 interface LoginFormData {
   emailOrPhoneNumber: string;
   password: string;
-}
+  isEmail: boolean;
+};
 
 export default function Login(): React.ReactElement {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [emailAndPhoneNumberError, setEmailAndPhoneNumberError] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const { showToast } = useToastContext();
+  const { dispatch } = useUserContext();
   const [formData, setFormData] = useState<LoginFormData>({
     emailOrPhoneNumber: '',
     password: '',
+    isEmail: true
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +39,7 @@ export default function Login(): React.ReactElement {
     }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setEmailAndPhoneNumberError('');
     setPasswordError('');
@@ -41,7 +52,44 @@ export default function Login(): React.ReactElement {
 
         return;
       }
+      formData.isEmail = false;
       // TODO: Backend login with phone number as data.
+      try {
+        const response: AxiosResponse = await api.post("/api/auth/login", formData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        });
+        const responseData: ServerResponseData<UserInfo> = await response.data;
+
+        if (responseData.success === true) {
+          setLoading(false);
+          dispatch({ 'type': 'LOG_IN', 'payload': responseData.data });
+          showToast("Login successfull!", "success");
+
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 1000);
+        }
+      }
+      catch (error: unknown) {
+        setLoading(false);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.data.errorCode === ErrorCodes.ER_INVALID_PASS) {
+            showToast("Invalid password!", "error");
+          }
+          else if (error.response?.data.errorCode === ErrorCodes.ER_EMAIL_NOT_REG) {
+            showToast("Email not registered!", "error");
+          }
+          else if (error.response?.data.errorCode === ErrorCodes.ER_PN_NOT_REG) {
+            showToast("Phone number not registered!", "error");
+          }
+          else {
+            showToast("An unexpected error occured!", "error");
+          }
+        }
+      }
     }
     else {
       if (!validator.isEmail(formData.emailOrPhoneNumber)) {
@@ -50,11 +98,10 @@ export default function Login(): React.ReactElement {
 
         return;
       }
+      formData.isEmail = true;
       // TODO: Backend login with email as data.
     }
     setLoading(false);
-    
-    console.log(formData);
   };
 
   return (

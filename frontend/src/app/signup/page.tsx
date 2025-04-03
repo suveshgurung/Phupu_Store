@@ -7,6 +7,7 @@ import validator from 'validator';
 import api from '@/app/utilities/api';
 import axios, { AxiosResponse } from 'axios';
 import ServerResponseData from '@/app/types/server-response';
+import ErrorCodes from '@/app/types/error-codes';
 import useToastContext from '@/app/hooks/use-toast-context';
 
 interface SignupFormData {
@@ -77,7 +78,11 @@ export default function SignUp(): React.ReactElement {
     }
 
     try {
-      const response: AxiosResponse = await api.post("/api/auth/signup", formData);
+      const response: AxiosResponse = await api.post("/api/auth/signup", formData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       const responseData: ServerResponseData = response.data;
 
       if (responseData.success === true) {
@@ -92,10 +97,10 @@ export default function SignUp(): React.ReactElement {
     catch (error: unknown) {
       setLoading(false);
       if (axios.isAxiosError(error)) {
-        if (error.response?.data.errorCode === "ER_EMAIL_EXISTS") {
+        if (error.response?.data.errorCode === ErrorCodes.ER_EMAIL_EXISTS) {
           showToast("Provided email already exists!", "error");
         }
-        else if (error.response?.data.errorCode === "ER_PN_EXISTS") {
+        else if (error.response?.data.errorCode === ErrorCodes.ER_PN_EXISTS) {
           showToast("Provided phone number already exists!", "error");
         }
       }

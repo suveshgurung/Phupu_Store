@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import pool from '../utilities/database-connection';
 import createError from '../utilities/create-error';

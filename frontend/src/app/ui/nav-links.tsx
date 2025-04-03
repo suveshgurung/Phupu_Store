@@ -47,6 +47,8 @@ export default function Navlinks() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user } = useUserContext();
 
+  console.log(user);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !(dropdownRef.current as HTMLElement).contains(event.target as Node)) {
@@ -108,9 +110,9 @@ export default function Navlinks() {
               aria-label="User menu"
             >
               <div className="w-10 h-10 rounded-full bg-white p-1 shadow-md transition-transform hover:scale-105 overflow-hidden">
-                {user?.profileImage ? (
+                {user?.profile_image ? (
                   <Image
-                    src={user.profileImage}
+                    src={user.profile_image}
                     alt={`${user.name}'s profile`}
                     className="w-full h-full object-cover rounded-full"
                   />  

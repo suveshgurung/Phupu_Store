@@ -1,5 +1,6 @@
 import express, { Express, Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import CustomError from './types/custom-error';
 
@@ -8,16 +9,18 @@ dotenv.config();
 const app: Express = express();
 
 const corsOptions = {
-  origin: "*",
+  origin: "http://localhost:3000",
   methods: [
     "GET",
     "POST",
     "DELETE",
   ],
+  credentials: true,
 };
 
 app.use(express.json());
 app.use(cors(corsOptions));
+app.use(cookieParser());
 
 const port = process.env.PORT;
 
