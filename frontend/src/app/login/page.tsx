@@ -1,10 +1,14 @@
 'use client'
+// TODO: user profile option for mobile screens.
 
 import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import validator from 'validator';
 import clsx from 'clsx';
 import axios, { AxiosResponse } from 'axios';
+import CryptoJS from 'crypto-js';
+import Cookies from 'js-cookie';
 import api from '@/app/utilities/api';
 import ServerResponseData from '@/app/types/server-response';
 import useToastContext from '@/app/hooks/use-toast-context';
@@ -19,6 +23,7 @@ interface LoginFormData {
 };
 
 export default function Login(): React.ReactElement {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [emailAndPhoneNumberError, setEmailAndPhoneNumberError] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string>('');
@@ -53,7 +58,7 @@ export default function Login(): React.ReactElement {
         return;
       }
       formData.isEmail = false;
-      // TODO: Backend login with phone number as data.
+
       try {
         const response: AxiosResponse = await api.post("/api/auth/login", formData, {
           headers: {
@@ -68,8 +73,15 @@ export default function Login(): React.ReactElement {
           dispatch({ 'type': 'LOG_IN', 'payload': responseData.data });
           showToast("Login successfull!", "success");
 
+          const secretKey = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_KEY;
+          if (!secretKey) {
+            throw new Error("Encryption key not provided!");
+          }
+          const encryptedUserInfo = CryptoJS.AES.encrypt(JSON.stringify(responseData.data), secretKey).toString();
+          Cookies.set("user", encryptedUserInfo, { expires: 7, secure: true, sameSite: "Strict" });
+
           setTimeout(() => {
-            window.location.href = "/";
+            router.push("/");
           }, 1000);
         }
       }
@@ -89,6 +101,9 @@ export default function Login(): React.ReactElement {
             showToast("An unexpected error occured!", "error");
           }
         }
+        else {
+          showToast("An unexpected error occured!", "error");
+        }
       }
     }
     else {
@@ -99,7 +114,53 @@ export default function Login(): React.ReactElement {
         return;
       }
       formData.isEmail = true;
-      // TODO: Backend login with email as data.
+
+      try {
+        const response: AxiosResponse = await api.post("/api/auth/login", formData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        });
+        const responseData: ServerResponseData<UserInfo> = await response.data;
+
+        if (responseData.success === true) {
+          setLoading(false);
+          dispatch({ 'type': 'LOG_IN', 'payload': responseData.data });
+          showToast("Login successfull!", "success");
+
+          const secretKey = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_KEY;
+          if (!secretKey) {
+            throw new Error("Encryption key not provided!");
+          }
+          const encryptedUserInfo = CryptoJS.AES.encrypt(JSON.stringify(responseData.data), secretKey).toString();
+          Cookies.set("user", encryptedUserInfo, { expires: 7, secure: true, sameSite: "Strict" });
+
+          setTimeout(() => {
+            router.push("/");
+          }, 1000);
+        }
+      }
+      catch (error: unknown) {
+        setLoading(false);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.data.errorCode === ErrorCodes.ER_INVALID_PASS) {
+            showToast("Invalid password!", "error");
+          }
+          else if (error.response?.data.errorCode === ErrorCodes.ER_EMAIL_NOT_REG) {
+            showToast("Email not registered!", "error");
+          }
+          else if (error.response?.data.errorCode === ErrorCodes.ER_PN_NOT_REG) {
+            showToast("Phone number not registered!", "error");
+          }
+          else {
+            showToast("An unexpected error occured!", "error");
+          }
+        }
+        else {
+          showToast("An unexpected error occured!", "error");
+        }
+      }
     }
     setLoading(false);
   };
