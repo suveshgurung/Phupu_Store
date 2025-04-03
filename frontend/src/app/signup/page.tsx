@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import validator from 'validator';
 import api from '@/app/utilities/api';
@@ -19,6 +20,7 @@ interface SignupFormData {
 }
 
 export default function SignUp(): React.ReactElement {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -90,7 +92,7 @@ export default function SignUp(): React.ReactElement {
         showToast("Sign up successful!", "success");
 
         setTimeout(() => {
-          window.location.href = "/login";
+          router.push("/login");
         }, 1000);
       }
     }

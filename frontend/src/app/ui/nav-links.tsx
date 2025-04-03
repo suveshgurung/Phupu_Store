@@ -121,7 +121,7 @@ export default function Navlinks() {
                 )}
               </div>
               {user.name && (
-                <span className="text-white hidden md:block">{user.name}</span>
+                <span className="text-black hidden md:block">{user.name}</span>
               )}
             </button>
               
