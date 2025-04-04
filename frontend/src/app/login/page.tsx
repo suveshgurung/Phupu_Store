@@ -1,5 +1,4 @@
 'use client'
-// TODO: user profile option for mobile screens.
 
 import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';

@@ -1,4 +1,5 @@
 'use client'
+// TODO: Edit profile href.
 
 import { useState, useEffect, useRef } from 'react';
 import useUserContext from '@/app/hooks/use-user-context';
@@ -236,7 +237,8 @@ export default function Navlinks() {
             </button>
             
             <div className="flex flex-col space-y-2 mt-4">
-              {links.map((link) => (
+              {/* show main links always */}
+              {links.filter(link => link.group === "main").map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
@@ -251,6 +253,36 @@ export default function Navlinks() {
                   {link.name}
                 </Link>
               ))}
+
+              {/* show auth links only if user is not present */}
+              {user ? (
+                <>
+                  <Link
+                    href="/"
+                    className="w-full px-4 py-3 text-left rounded-md transition-colors duration-200 hover:bg-gray-200"
+                    onClick={() => setIsDrawerOpen(false)}
+                  >
+                    Edit Profile
+                  </Link>
+                  <button
+                    className="w-full px-4 py-3 text-left rounded-md transition-colors duration-200 hover:bg-gray-200 hover:cursor-pointer"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                links.filter(link => link.group === "auth").map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className="w-full px-4 py-3 text-left rounded-md transition-colors duration-200 hover:bg-gray-200"
+                    onClick={() => setIsDrawerOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                ))
+              )}
             </div>
           </div>
         </div>
