@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useReducer, ReactNode, useRef, useEffect } from 'react';
+import { createContext, useReducer, ReactNode, useState, useEffect } from 'react';
 import CryptoJS from 'crypto-js';
 import Cookies from 'js-cookie';
 import UserInfo from '@/app/types/user-info';
@@ -15,7 +15,7 @@ interface UserContextType {
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
 
-const UserReducer = (state: UserInfo | null | undefined, action: UserAction): UserInfo | null |undefined => {
+const UserReducer = (state: UserInfo | null | undefined, action: UserAction): UserInfo | null | undefined => {
   switch (action.type) {
     case "LOG_IN":
       return action.payload;
@@ -28,7 +28,7 @@ const UserReducer = (state: UserInfo | null | undefined, action: UserAction): Us
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, dispatch] = useReducer(UserReducer, null);
-  const userLoaded = useRef<boolean>(false);
+  const [userLoaded, setUserLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     const secretKey = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_KEY;
@@ -44,11 +44,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       dispatch({ type: "LOG_IN", payload: decryptedUserInfo });
     }
 
-    userLoaded.current = true;
+    setUserLoaded(true);
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, userLoaded: userLoaded.current, dispatch }}>
+    <UserContext.Provider value={{ user, userLoaded, dispatch }}>
       {children}
     </UserContext.Provider>
   );
