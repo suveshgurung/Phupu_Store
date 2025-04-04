@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useReducer, ReactNode, useEffect } from 'react';
+import { createContext, useReducer, ReactNode, useRef, useEffect } from 'react';
 import CryptoJS from 'crypto-js';
 import Cookies from 'js-cookie';
 import UserInfo from '@/app/types/user-info';
@@ -9,6 +9,7 @@ type UserAction = { type: "LOG_IN", payload: UserInfo | null | undefined } | { t
 
 interface UserContextType {
   user: UserInfo | null | undefined;
+  userLoaded: boolean;
   dispatch: (action: UserAction) => void;
 };
 
@@ -27,6 +28,7 @@ const UserReducer = (state: UserInfo | null | undefined, action: UserAction): Us
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, dispatch] = useReducer(UserReducer, null);
+  const userLoaded = useRef<boolean>(false);
 
   useEffect(() => {
     const secretKey = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_KEY;
@@ -41,10 +43,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       const decryptedUserInfo = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
       dispatch({ type: "LOG_IN", payload: decryptedUserInfo });
     }
+
+    userLoaded.current = true;
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, dispatch }}>
+    <UserContext.Provider value={{ user, userLoaded: userLoaded.current, dispatch }}>
       {children}
     </UserContext.Provider>
   );
