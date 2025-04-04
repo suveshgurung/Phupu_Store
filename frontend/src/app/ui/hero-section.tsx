@@ -12,10 +12,10 @@ export default function HeroSection({ searchTerm, setSearchTerm }: HeroSectionPr
       <div className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-3xl">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Delicious Food Delivered to Your Doorstep
+            Delicious Home-Made Food Delivered to Your Doorstep
           </h1>
           <p className="text-lg md:text-xl mb-8">
-            Experience the authentic taste of Nepali and Indian cuisine from the comfort of your home.
+            Experience the authentic taste of home-made foods with no added preservatives.
           </p>
           <div className="relative flex w-full max-w-md rounded-full overflow-hidden shadow-lg bg-white">
             <input

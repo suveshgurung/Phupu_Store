@@ -47,8 +47,6 @@ export default function Navlinks() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user } = useUserContext();
 
-  console.log(user);
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !(dropdownRef.current as HTMLElement).contains(event.target as Node)) {

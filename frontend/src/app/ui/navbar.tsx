@@ -1,5 +1,5 @@
-import Navlinks from '@/app/ui/nav-links';
 import Link from 'next/link';
+import Navlinks from '@/app/ui/nav-links';
 
 export default function Navbar() {
   return(
