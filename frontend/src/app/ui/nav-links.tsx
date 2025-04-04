@@ -1,12 +1,16 @@
 'use client'
-// TODO: Edit profile href.
+// TODO: "Edit profile" option href add garne.
 
 import { useState, useEffect, useRef } from 'react';
-import useUserContext from '@/app/hooks/use-user-context';
 import { FaUserCircle, FaSignOutAlt, FaUserEdit } from 'react-icons/fa';
 import Image from 'next/image';
 import Link from 'next/link';
-import clsx from 'clsx'
+import clsx from 'clsx';
+import { AxiosResponse } from 'axios';
+import useUserContext from '@/app/hooks/use-user-context';
+import useToastContext from '@/app/hooks/use-toast-context';
+import api from '@/app/utilities/api';
+import ServerResponseData from '../types/server-response';
 
 interface Navlinks {
   name: string,
@@ -47,6 +51,7 @@ export default function Navlinks() {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user } = useUserContext();
+  const { showToast } = useToastContext();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -76,8 +81,27 @@ export default function Navlinks() {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleLogout = () => {
-    // TODO: Logout logic
+  const handleLogout = async () => {
+    const id = user?.id;
+
+    try {
+      const response: AxiosResponse = await api.get(`/api/auth/logout/${id}`, {
+        withCredentials: true,
+      });
+
+      const responseData: ServerResponseData = response.data;
+
+      if (responseData.success === true) {
+        showToast("Logged out!", "success");
+      }
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+    }
+    catch (error: unknown) {
+      showToast("An unexpected error occured!", "error");
+    }
     setIsDropdownOpen(false);
   };
 
@@ -143,7 +167,7 @@ export default function Navlinks() {
                   
                 <button 
                   onClick={handleLogout}
-                  className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors"
+                  className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors hover:cursor-pointer"
                 >
                   <FaSignOutAlt className="mr-3 text-red-500" />
                   Logout

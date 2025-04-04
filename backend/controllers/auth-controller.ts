@@ -34,6 +34,12 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       const token = createToken(user.email);
       const refreshToken = createRefreshToken(user.email);
 
+      const [result] = await connection.query<any[]>(`
+        INSERT INTO
+        user_refresh_token_list(id, refresh_token)
+        VALUES(?, ?)
+      `, [user.id, refreshToken]);
+
       res.cookie('token', token, {
         httpOnly: true,
         sameSite: 'strict',
@@ -77,6 +83,12 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       
       const token = createToken(user.email);
       const refreshToken = createRefreshToken(user.email);
+
+      const [result] = await connection.query<any[]>(`
+        INSERT INTO
+        user_refresh_token_list(id, refresh_token)
+        VALUES(?, ?)
+      `, [user.id, refreshToken]);
 
       res.cookie('token', token, {
         httpOnly: true,
@@ -146,14 +158,42 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     }
   }
   catch (error: any) {
-    return next(error);
+    return next(createError(500, error.message, ErrorCodes.ER_UNEXP));
   }
   finally {
     connection.release();
   }
 };
 
-const logout = (req: Request, res: Response, next: NextFunction) => {
+const logout = async (req: Request, res: Response, next: NextFunction) => {
+  const connection = await pool.getConnection();
+  const { id } = req.params;
+
+  try {
+    const [result] = await connection.query(`
+      DELETE
+      FROM
+      user_refresh_token_list
+      WHERE
+      id=?
+    `, [id]);
+
+    res.clearCookie("token");
+    res.clearCookie("refreshToken");
+    res.clearCookie("user");
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Logout successfull!"
+    });
+  }
+  catch (error: any) {
+    return next(createError(500, error.message, ErrorCodes.ER_UNEXP));
+  }
+  finally {
+    connection.release();
+  }
 };
 
 export { login, signup, logout };
