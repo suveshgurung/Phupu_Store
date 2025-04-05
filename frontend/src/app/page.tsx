@@ -130,6 +130,9 @@ export default function Home() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20]);
   const [showPopularOnly, setShowPopularOnly] = useState(false);
   
+  // Get unique categories for filter dropdown
+  const categories = ['All', ...Array.from(new Set(foodItems.map(item => item.category)))];
+  
   // Filter food items based on search, category, and price
   const filteredItems = foodItems.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -194,7 +197,7 @@ export default function Home() {
         
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Sidebar - Category Filters */}
-          <CategoryFilter foodItems={foodItems} setSearchTerm={setSearchTerm} />
+          <CategoryFilter setSearchTerm={setSearchTerm} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} priceRange={priceRange} setPriceRange={setPriceRange} showPopularOnly={showPopularOnly} setShowPopularOnly={setShowPopularOnly} categories={categories} />
           
           {/* Right Content - Food Items Grid */}
           <div className="w-full md:w-3/4 lg:w-4/5">
