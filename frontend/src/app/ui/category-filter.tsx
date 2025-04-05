@@ -24,7 +24,7 @@ export default function CategoryFilter({ setSearchTerm, selectedCategory, setSel
                 value={category}
                 checked={selectedCategory === category}
                 onChange={() => setSelectedCategory(category)}
-                className="form-radio h-4 w-4 text-red-600"
+                className="form-radio h-4 w-4 text-red-600 cursor-pointer"
               />
               <span className="text-gray-700">{category}</span>
             </label>
@@ -44,7 +44,7 @@ export default function CategoryFilter({ setSearchTerm, selectedCategory, setSel
             step="1"
             value={priceRange[1]}
             onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-            className="w-full"
+            className="w-full cursor-pointer"
           />
         </div>
 
@@ -54,7 +54,7 @@ export default function CategoryFilter({ setSearchTerm, selectedCategory, setSel
               type="checkbox"
               checked={showPopularOnly}
               onChange={() => setShowPopularOnly(!showPopularOnly)}
-              className="form-checkbox h-4 w-4 text-red-600"
+              className="form-checkbox h-4 w-4 text-red-600 cursor-pointer"
             />
             <span className="text-gray-700">Popular Items Only</span>
           </label>
@@ -67,7 +67,7 @@ export default function CategoryFilter({ setSearchTerm, selectedCategory, setSel
             setShowPopularOnly(false);
             setSearchTerm('');
           }}
-          className="mt-6 w-full py-2 text-sm text-red-600 border border-red-600 rounded-md hover:bg-red-50"
+          className="mt-6 w-full py-2 text-sm text-red-600 border border-red-600 rounded-md hover:bg-red-50 cursor-pointer"
         >
           Reset Filters
         </button>

@@ -318,7 +318,7 @@ export default function Home() {
         <div className="fixed bottom-6 right-6 z-50">
           <button 
             onClick={() => setShowCart(!showCart)}
-            className="relative flex items-center justify-center w-16 h-16 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 transition-colors"
+            className="relative flex items-center justify-center w-16 h-16 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 hover:cursor-pointer transition-colors"
           >
             <ShoppingCart size={24} />
             {cart.length > 0 && (
