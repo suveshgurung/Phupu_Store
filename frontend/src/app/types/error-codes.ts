@@ -4,7 +4,10 @@ enum ErrorCodes {
   ER_PN_EXISTS,
   ER_EMAIL_NOT_REG,
   ER_PN_NOT_REG,
-  ER_INVALID_PASS
+  ER_INVALID_PASS,
+  ER_SECRET_KEY_ABSENT,
+  ER_UNAUTHORIZED,
+  ER_FORBIDDEN
 };
 
 export default ErrorCodes;
