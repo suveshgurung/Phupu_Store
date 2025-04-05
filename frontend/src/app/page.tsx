@@ -3,9 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
+import { AxiosResponse } from 'axios';
 import HeroSection from '@/app/ui/hero-section';
 import CategoryFilter from '@/app/ui/category-filter';
 import FoodItem from '@/app/types/food-item';
+import CartItems from '@/app/types/cart-info';
+import ServerResponseCartData from '@/app/types/server-response-cart-data';
+import useUserContext from '@/app/hooks/use-user-context';
+import useToastContext from '@/app/hooks/use-toast-context';
+import api from '@/app/utilities/api';
+import ServerResponseData from '@/app/types/server-response';
 
 // Sample food items data
 const foodItems: FoodItem[] = [
@@ -121,14 +128,14 @@ const foodItems: FoodItem[] = [
 
 export default function Home() {
   // State for cart items
-  const [cart, setCart] = useState<{item: FoodItem, quantity: number}[]>([]);
-  const [showCart, setShowCart] = useState(false);
+  const [cart, setCart] = useState<CartItems[]>([]);
+  const [showCart, setShowCart] = useState<boolean>(false);
   
   // State for search and filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20]);
-  const [showPopularOnly, setShowPopularOnly] = useState(false);
+  const [showPopularOnly, setShowPopularOnly] = useState<boolean>(false);
   
   // Get unique categories for filter dropdown
   const categories = ['All', ...Array.from(new Set(foodItems.map(item => item.category)))];
@@ -143,9 +150,51 @@ export default function Home() {
     
     return matchesSearch && matchesCategory && matchesPrice && matchesPopular;
   });
+
+  const { user } = useUserContext();
+  const { showToast } = useToastContext();
+
+  // Get the user cart items.
+  useEffect(() => {
+    const getCartItems = async () => {
+      if (user) {
+        try {
+          const response: AxiosResponse = await api.get("/api/cart", {
+            withCredentials: true,
+          });
+
+          const responseData: ServerResponseData<ServerResponseCartData[]> = response.data;
+
+          if (responseData.success === true) {
+            const cartData = responseData.data?.map(({ product_id, quantity }) => {
+              const item = foodItems.find(food => food.id === product_id);
+              if (!item) {
+                return null;
+              }
+
+              return { item, quantity };
+            })
+            .filter(Boolean) as { item: FoodItem, quantity: number }[];
+
+            setCart(cartData);
+          }
+        }
+        catch (error: unknown) {
+          showToast("An unexpected error occured!", "error");
+        }
+      }
+    };
+
+    getCartItems();
+  }, [user, showToast]);
   
   // Add item to cart
   const addToCart = (item: FoodItem) => {
+    if (!user) {
+      showToast("You must be logged in!", "warning");
+      return;
+    }
+
     setCart(prevCart => {
       const existingItem = prevCart.find(cartItem => cartItem.item.id === item.id);
       if (existingItem) {
@@ -158,6 +207,7 @@ export default function Home() {
         return [...prevCart, { item, quantity: 1 }];
       }
     });
+    // TODO: send the cart information to the backend.
   };
   
   // Remove item from cart
@@ -234,7 +284,7 @@ export default function Home() {
                         </span>
                         <button 
                           onClick={() => addToCart(item)}
-                          className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
+                          className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:cursor-pointer transition-colors text-sm"
                         >
                           Add to Cart
                         </button>
@@ -264,19 +314,21 @@ export default function Home() {
       </section>
       
       {/* Cart Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button 
-          onClick={() => setShowCart(!showCart)}
-          className="relative flex items-center justify-center w-16 h-16 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 transition-colors"
-        >
-          <ShoppingCart size={24} />
-          {cart.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-yellow-500 text-xs text-white w-6 h-6 rounded-full flex items-center justify-center">
+      {user && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <button 
+            onClick={() => setShowCart(!showCart)}
+            className="relative flex items-center justify-center w-16 h-16 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 transition-colors"
+          >
+            <ShoppingCart size={24} />
+            {cart.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-yellow-500 text-xs text-white w-6 h-6 rounded-full flex items-center justify-center">
               {cart.reduce((total, item) => total + item.quantity, 0)}
-            </span>
-          )}
-        </button>
-      </div>
+              </span>
+            )}
+          </button>
+        </div>
+      )}
       
       {/* Cart Sidebar */}
       {showCart && (

@@ -14,6 +14,7 @@ const corsOptions = {
     "GET",
     "POST",
     "DELETE",
+    "PATCH",
   ],
   credentials: true,
 };
@@ -25,8 +26,10 @@ app.use(cookieParser());
 const port = process.env.PORT;
 
 import authRouter from './routes/auth-route';
+import cartRouter from './routes/cart-route';
 
 app.use('/api/auth', authRouter);
+app.use('/api/cart', cartRouter);
 
 const errorHandlerMiddleware: ErrorRequestHandler = (error: CustomError, req: Request, res: Response, next: NextFunction) => {
   const statusCode = error.statusCode || 500;
