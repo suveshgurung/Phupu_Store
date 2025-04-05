@@ -65,7 +65,7 @@ export default function Login(): React.ReactElement {
           },
           withCredentials: true,
         });
-        const responseData: ServerResponseData<UserInfo> = await response.data;
+        const responseData: ServerResponseData<UserInfo> = response.data;
 
         if (responseData.success === true) {
           setLoading(false);

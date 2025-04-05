@@ -50,7 +50,7 @@ export default function Navlinks() {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { user } = useUserContext();
+  const { user, dispatch } = useUserContext();
   const { showToast } = useToastContext();
 
   useEffect(() => {
@@ -85,19 +85,16 @@ export default function Navlinks() {
     const id = user?.id;
 
     try {
-      const response: AxiosResponse = await api.get(`/api/auth/logout/${id}`, {
+      const response: AxiosResponse = await api.post(`/api/auth/logout/${id}`, null, {
         withCredentials: true,
       });
 
       const responseData: ServerResponseData = response.data;
 
       if (responseData.success === true) {
+        dispatch({ type: "LOG_OUT" });
         showToast("Logged out!", "success");
       }
-
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
     }
     catch (error: unknown) {
       showToast("An unexpected error occured!", "error");
