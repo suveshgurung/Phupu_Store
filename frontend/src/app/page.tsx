@@ -180,7 +180,7 @@ export default function Home() {
           }
         }
         catch (error: unknown) {
-          showToast("An unexpected error occured!", "error");
+          return showToast("An unexpected error occured!", "error");
         }
       }
     };
@@ -189,10 +189,9 @@ export default function Home() {
   }, [user, showToast]);
   
   // Add item to cart
-  const addToCart = (item: FoodItem) => {
+  const addToCart = async (item: FoodItem) => {
     if (!user) {
-      showToast("You must be logged in!", "warning");
-      return;
+      return showToast("You must be logged in!", "warning");
     }
 
     setCart(prevCart => {
@@ -203,11 +202,26 @@ export default function Home() {
             ? { ...cartItem, quantity: cartItem.quantity + 1 } 
             : cartItem
         );
-      } else {
+      } 
+      else {
         return [...prevCart, { item, quantity: 1 }];
       }
     });
-    // TODO: send the cart information to the backend.
+
+
+    // Update cart data in backend.
+    try {
+      const response: AxiosResponse = await api.post("/api/cart", { product_id: item.id }, {withCredentials: true });
+      const responseData: ServerResponseData = response.data;
+
+      console.log(responseData);
+      if (responseData.success === true) {
+        showToast("Item added to cart!", "success");
+      }
+    }
+    catch (error) {
+      return showToast("An unexpected error occurred!", "error");
+    }
   };
   
   // Remove item from cart
