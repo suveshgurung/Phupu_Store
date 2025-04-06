@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Minus, Plus, ArrowLeft, CreditCard, Truck } from 'lucide-react';
+import { X, Minus, Plus, ArrowLeft, Truck, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import useCartContext from '@/app/hooks/use-cart-context';
 import useUserContext from '@/app/hooks/use-user-context';
@@ -16,9 +16,9 @@ export default function CartPage() {
   const { cart, setCart } = useCartContext();
   const { user } = useUserContext();
   const { showToast } = useToastContext();
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod'>('card');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [paymentMethod, setPaymentMethod] = useState<'esewa' | 'bank' | 'cod'>('cod');
   const [processingOrder, setProcessingOrder] = useState<boolean>(false);
+  const [showQR, setShowQR] = useState<boolean>(false);
 
   // Calculate totals
   const subtotal = cart.reduce((total, cartItem) => 
@@ -28,10 +28,18 @@ export default function CartPage() {
   const tax = subtotal * 0.07; // Assuming 7% tax
   const total = subtotal + deliveryFee + tax;
 
+  // Effect to show QR code when esewa or bank is selected
+  useEffect(() => {
+    if (paymentMethod === 'esewa' || paymentMethod === 'bank') {
+      setShowQR(true);
+    } else {
+      setShowQR(false);
+    }
+  }, [paymentMethod]);
+
   // Remove item from cart
   const removeFromCart = async (itemId: number) => {
     try {
-      setLoading(true);
       const response: AxiosResponse = await api.delete(`/api/cart/${itemId}`, {
         withCredentials: true
       });
@@ -55,8 +63,6 @@ export default function CartPage() {
       else {
         showToast("An unexpected error occurred!", "error");
       }
-    } finally {
-      setLoading(false);
     }
   };
   
@@ -68,7 +74,6 @@ export default function CartPage() {
     }
 
     try {
-      setLoading(true);
       const response: AxiosResponse = await api.patch("/api/cart", {
         quantity: newQuantity,
         product_id: itemId
@@ -101,8 +106,6 @@ export default function CartPage() {
         }
       }
       showToast("An unexpected error occurred!", "error");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -155,15 +158,6 @@ export default function CartPage() {
         <h1 className="text-2xl md:text-3xl font-bold ml-auto">Your Cart</h1>
       </div>
 
-      {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600 mx-auto"></div>
-            <p className="mt-2">Processing...</p>
-          </div>
-        </div>
-      )}
-
       {cart.length > 0 ? (
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Cart Items */}
@@ -190,7 +184,7 @@ export default function CartPage() {
                         <h3 className="font-medium text-lg">{cartItem.item.name}</h3>
                         <button 
                           onClick={() => removeFromCart(cartItem.item.id)}
-                          className="text-gray-400 hover:text-red-600 transition-colors"
+                          className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
                           aria-label="Remove item"
                         >
                           <X size={20} />
@@ -201,7 +195,7 @@ export default function CartPage() {
                         <div className="flex items-center border rounded-md">
                           <button 
                             onClick={() => updateQuantity(cartItem.item.id, cartItem.quantity - 1)}
-                            className="px-3 py-1 text-gray-600 hover:text-red-600 transition-colors"
+                            className="px-3 py-1 text-gray-600 hover:text-red-600 transition-colors cursor-pointer"
                             aria-label="Decrease quantity"
                           >
                             <Minus size={16} />
@@ -209,7 +203,7 @@ export default function CartPage() {
                           <span className="px-3 py-1">{cartItem.quantity}</span>
                           <button 
                             onClick={() => updateQuantity(cartItem.item.id, cartItem.quantity + 1)}
-                            className="px-3 py-1 text-gray-600 hover:text-red-600 transition-colors"
+                            className="px-3 py-1 text-gray-600 hover:text-red-600 transition-colors cursor-pointer"
                             aria-label="Increase quantity"
                           >
                             <Plus size={16} />
@@ -256,36 +250,75 @@ export default function CartPage() {
                 
                 <div className="mb-6">
                   <h3 className="font-medium mb-3">Payment Method</h3>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <button
-                      onClick={() => setPaymentMethod('card')}
-                      className={`flex items-center justify-center p-3 border rounded-lg transition-colors ${
-                        paymentMethod === 'card' 
+                      onClick={() => setPaymentMethod('esewa')}
+                      className={`flex items-center justify-center p-3 border rounded-lg transition-colors cursor-pointer ${
+                        paymentMethod === 'esewa' 
                           ? 'bg-red-600 text-white border-red-600' 
                           : 'border-gray-300 hover:border-red-600'
                       }`}
                     >
-                      <CreditCard size={20} className="mr-2" />
-                      <span>Credit Card</span>
+                      <Wallet size={20} className="mr-2" />
+                      <span>Esewa</span>
+                    </button>
+                    <button
+                      onClick={() => setPaymentMethod('bank')}
+                      className={`flex items-center justify-center p-3 border rounded-lg transition-colors cursor-pointer ${
+                        paymentMethod === 'bank' 
+                          ? 'bg-red-600 text-white border-red-600' 
+                          : 'border-gray-300 hover:border-red-600'
+                      }`}
+                    >
+                      <Wallet size={20} className="mr-2" />
+                      <span>Bank</span>
                     </button>
                     <button
                       onClick={() => setPaymentMethod('cod')}
-                      className={`flex items-center justify-center p-3 border rounded-lg transition-colors ${
+                      className={`flex items-center justify-center p-3 border rounded-lg transition-colors cursor-pointer ${
                         paymentMethod === 'cod' 
                           ? 'bg-red-600 text-white border-red-600' 
                           : 'border-gray-300 hover:border-red-600'
                       }`}
                     >
                       <Truck size={20} className="mr-2" />
-                      <span>Cash on Delivery</span>
+                      <span>COD</span>
                     </button>
                   </div>
                 </div>
                 
+                {/* QR Code Display */}
+                {showQR && (
+                  <div className="mb-6 text-center">
+                    <div className="bg-gray-50 p-4 rounded-lg mb-3">
+                      <p className="text-sm mb-3">
+                        {paymentMethod === 'esewa' ? 'Scan to pay with Esewa' : 'Scan to pay via Bank Transfer'}
+                      </p>
+                      <div className="mb-2 inline-block p-2 bg-white rounded-lg">
+                        <Image 
+                          src={paymentMethod === 'esewa' ? 
+                            "/api/placeholder/150/150" : 
+                            "/api/placeholder/150/150"} 
+                          alt={`${paymentMethod} QR code`}
+                          width={150}
+                          height={150}
+                          className="mx-auto"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        {paymentMethod === 'esewa' ? 
+                          'After payment, order will be processed automatically' : 
+                          'Please enter your transaction ID at checkout'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
                 <button
                   onClick={placeOrder}
                   disabled={processingOrder}
-                  className="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400 flex items-center justify-center"
+                  className="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400 flex items-center justify-center cursor-pointer"
                 >
                   {processingOrder ? (
                     <>
