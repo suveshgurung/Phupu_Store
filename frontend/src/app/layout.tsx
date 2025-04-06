@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { UserProvider } from "@/app/context/user-context";
 import { ToastProvider } from "@/app/context/toast-context";
+import { CartProvider } from "@/app/context/cart-context";
 import ClientLayout from "@/app/client-layout";
 import "./globals.css";
 
@@ -38,9 +39,11 @@ export default function RootLayout({
       >
         <ToastProvider>
           <UserProvider>
-            <ClientLayout>
-              {children}
-            </ClientLayout>
+            <CartProvider>
+              <ClientLayout>
+                {children}
+              </ClientLayout>
+            </CartProvider>
           </UserProvider>
         </ToastProvider>
       </body>
