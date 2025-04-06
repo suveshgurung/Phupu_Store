@@ -194,28 +194,32 @@ export default function Home() {
       return showToast("You must be logged in!", "warning");
     }
 
-    setCart(prevCart => {
-      const existingItem = prevCart.find(cartItem => cartItem.item.id === item.id);
-      if (existingItem) {
-        return prevCart.map(cartItem => 
-          cartItem.item.id === item.id 
-            ? { ...cartItem, quantity: cartItem.quantity + 1 } 
-            : cartItem
-        );
-      } 
-      else {
-        return [...prevCart, { item, quantity: 1 }];
-      }
-    });
-
-
     // Update cart data in backend.
     try {
-      const response: AxiosResponse = await api.post("/api/cart", { product_id: item.id }, {withCredentials: true });
+      const response: AxiosResponse = await api.post("/api/cart", {
+        product_id: item.id 
+      }, {
+        withCredentials: true 
+      });
       const responseData: ServerResponseData = response.data;
 
-      console.log(responseData);
       if (responseData.success === true) {
+        // update the cart state variable.
+        setCart(prevCart => {
+          // check if the item already exists in cart.
+          const existingItem = prevCart.find(cartItem => cartItem.item.id === item.id);
+          if (existingItem) {
+            return prevCart.map(cartItem => 
+              cartItem.item.id === item.id 
+                ? { ...cartItem, quantity: cartItem.quantity + 1 } 
+                : cartItem
+            );
+          } 
+          else {
+            return [...prevCart, { item, quantity: 1 }];
+          }
+        });
+
         showToast("Item added to cart!", "success");
       }
     }

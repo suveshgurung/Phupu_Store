@@ -43,7 +43,7 @@ const getCartItems = async (req: RequestWithUser, res: Response, next: NextFunct
       res.cookie('token', req.token, {
         httpOnly: true,
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 20 * 60 * 1000,
         path: '/'
       });
     }
@@ -91,6 +91,15 @@ const addCartItems = async (req: RequestWithUser, res: Response, next: NextFunct
         VALUES(?, ?, ?)
       `, [user?.id, product_id, 1]);
 
+      if (req.token) {
+        res.cookie('token', req.token, {
+          httpOnly: true,
+          sameSite: 'strict',
+          maxAge: 20 * 60 * 1000,
+          path: '/'
+        });
+      }
+
       res.status(201).json({
         success: true,
         statusCode: 201,
@@ -106,6 +115,15 @@ const addCartItems = async (req: RequestWithUser, res: Response, next: NextFunct
         WHERE
         user_id=? AND product_id=?
       `, [prevItemQuantity + 1, user?.id, product_id]);
+
+      if (req.token) {
+        res.cookie('token', req.token, {
+          httpOnly: true,
+          sameSite: 'strict',
+          maxAge: 20 * 60 * 1000,
+          path: '/'
+        });
+      }
 
       res.status(200).json({
         success: true,
