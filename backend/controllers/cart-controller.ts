@@ -67,7 +67,7 @@ const getCartItems = async (req: RequestWithUser, res: Response, next: NextFunct
 const addCartItems = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   const connection = await pool.getConnection();
   const user = req.user;
-  const { product_id } = req.body;
+  const { product_id, quantity } = req.body;
 
   try {
     const [rows] = await connection.query(`
@@ -90,7 +90,7 @@ const addCartItems = async (req: RequestWithUser, res: Response, next: NextFunct
         INTO
         user_cart(user_id, product_id, quantity)
         VALUES(?, ?, ?)
-      `, [user?.id, product_id, 1]);
+      `, [user?.id, product_id, quantity ? quantity : 1]);
 
       if (req.token) {
         res.cookie('token', req.token, {
@@ -110,12 +110,17 @@ const addCartItems = async (req: RequestWithUser, res: Response, next: NextFunct
     else {
       const prevItemQuantity = result[0].quantity;
 
+      let newItemQuantity = prevItemQuantity + 1;
+      if (quantity) {
+        newItemQuantity = prevItemQuantity + quantity;
+      }
+
       const [updateResult] = await connection.query<ResultSetHeader>(`
         UPDATE user_cart
         SET quantity=?
         WHERE
         user_id=? AND product_id=?
-      `, [prevItemQuantity + 1, user?.id, product_id]);
+      `, [newItemQuantity, user?.id, product_id]);
 
       if (updateResult.affectedRows === 0) {
         return next(createError(500, "Product quantity could not be updated!", ErrorCodes.ER_PRODUCT_QUANTITY_NOT_UPDATED));

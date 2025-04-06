@@ -1,4 +1,3 @@
-// app/product/[slug]/page.tsx
 'use client'
 
 import React, { useState, useEffect } from 'react';
@@ -29,7 +28,7 @@ export default function ProductDetailPage() {
     const fetchProductDetail = async () => {
       try {
         setLoading(true);
-        // Call to your Express backend
+
         const response: AxiosResponse = await api.get(`/api/product/${slug}`);
         const responseData: ServerResponseData<FoodItem> = response.data;
         
@@ -165,14 +164,14 @@ export default function ProductDetailPage() {
               <div className="flex items-center border rounded-md">
                 <button 
                   onClick={decrementQuantity}
-                  className="px-3 py-2 hover:bg-gray-100"
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                 >
                   <Minus size={16} />
                 </button>
                 <span className="px-4 py-2 border-l border-r">{quantity}</span>
                 <button 
                   onClick={incrementQuantity}
-                  className="px-3 py-2 hover:bg-gray-100"
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                 >
                   <Plus size={16} />
                 </button>
@@ -182,7 +181,7 @@ export default function ProductDetailPage() {
             {/* Add to cart button */}
             <button
               onClick={handleAddToCart}
-              className="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+              className="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center cursor-pointer"
             >
               <ShoppingCart size={20} className="mr-2" />
               Add to Cart - ${(product.price * quantity).toFixed(2)}
