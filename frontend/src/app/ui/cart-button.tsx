@@ -1,8 +1,10 @@
 import { ShoppingCart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import useUserContext from '@/app/hooks/use-user-context';
 import useCartContext from '@/app/hooks/use-cart-context';
 
 export default function CartButton() {
+  const router = useRouter();
   const { user } = useUserContext();
   const { cart } = useCartContext();
 
@@ -11,6 +13,7 @@ export default function CartButton() {
       {user && (
         <div className="fixed bottom-6 right-6 z-50">
           <button 
+            onClick={() => router.push("/cart")}
             className="relative flex items-center justify-center w-16 h-16 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 hover:cursor-pointer transition-colors"
           >
             <ShoppingCart size={24} />

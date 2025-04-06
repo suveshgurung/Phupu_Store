@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import axios, { AxiosResponse } from 'axios';
 import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
 import HeroSection from '@/app/ui/hero-section';
 import CategoryFilter from '@/app/ui/category-filter';
 import FoodItem from '@/app/types/food-item';
@@ -19,7 +18,6 @@ import ErrorCodes from '@/app/types/error-codes';
 export default function Home() {
   // State for cart items
   const { cart, setCart } = useCartContext();
-  const [showCart, setShowCart] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
@@ -232,11 +230,6 @@ export default function Home() {
       return showToast("An unexpected error occured!", "error");
     }
   };
-  
-  // Calculate total price of items in cart
-  const cartTotal = cart.reduce((total, cartItem) => 
-    total + (cartItem.item.price * cartItem.quantity), 0
-  );
 
   if (loading) {
     return (
@@ -335,83 +328,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-      
-      {/* Cart Button */}
-      
-      {/* Cart Sidebar */}
-      {showCart && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowCart(false)}></div>
-          <div className="absolute top-0 right-0 w-full md:w-96 h-full bg-white shadow-xl transform transition-transform">
-            <div className="flex flex-col h-full">
-              <div className="flex justify-between items-center p-4 border-b">
-                <h2 className="text-xl font-semibold">Your Cart</h2>
-                <button onClick={() => setShowCart(false)} className="text-gray-500 hover:text-gray-700 cursor-pointer">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <div className="flex-grow overflow-y-auto p-4">
-                {cart.length > 0 ? (
-                  cart.map(cartItem => (
-                    <div key={cartItem.item.id} className="flex items-center py-4 border-b">
-                      <div className="w-16 h-16 rounded overflow-hidden mr-4">
-                        <Image
-                          width={200}
-                          height={200}
-                          src={cartItem.item.product_image_url}
-                          alt={cartItem.item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex-grow">
-                        <h3 className="font-medium">{cartItem.item.name}</h3>
-                        <p className="text-red-600">${cartItem.item.price.toFixed(2)}</p>
-                      </div>
-                      <div className="flex items-center">
-                        <button 
-                          onClick={() => updateQuantity(cartItem.item.id, cartItem.quantity - 1)}
-                          className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-l"
-                        >
-                          -
-                        </button>
-                        <span className="w-8 h-8 flex items-center justify-center bg-gray-100">
-                          {cartItem.quantity}
-                        </span>
-                        <button 
-                          onClick={() => updateQuantity(cartItem.item.id, cartItem.quantity + 1)}
-                          className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-r"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <ShoppingCart size={64} className="text-gray-300 mb-4" />
-                    <p className="text-gray-500">Your cart is empty</p>
-                  </div>
-                )}
-              </div>
-              
-              {cart.length > 0 && (
-                <div className="p-4 border-t">
-                  <div className="flex justify-between mb-4">
-                    <span className="font-medium">Total:</span>
-                    <span className="font-semibold text-lg">${cartTotal.toFixed(2)}</span>
-                  </div>
-                  <button className="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                    Proceed to Checkout
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
