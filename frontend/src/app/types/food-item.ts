@@ -4,7 +4,7 @@ interface FoodItem {
   description: string;
   price: number;
   category: string;
-  imageUrl: string;
+  product_image_url: string;
   popular: boolean;
 }
 

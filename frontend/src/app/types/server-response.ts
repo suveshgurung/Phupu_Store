@@ -3,6 +3,7 @@ interface ServerResponseData<T = unknown> {
   statusCode: number;
   message: string;
   data?: T;
+  errorCode?: number;
 }
 
 export default ServerResponseData;
