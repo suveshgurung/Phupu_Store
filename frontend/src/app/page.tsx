@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
-import { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import HeroSection from '@/app/ui/hero-section';
 import CategoryFilter from '@/app/ui/category-filter';
 import FoodItem from '@/app/types/food-item';
@@ -13,6 +13,7 @@ import useUserContext from '@/app/hooks/use-user-context';
 import useToastContext from '@/app/hooks/use-toast-context';
 import api from '@/app/utilities/api';
 import ServerResponseData from '@/app/types/server-response';
+import ErrorCodes from '@/app/types/error-codes';
 
 // Sample food items data
 const foodItems: FoodItem[] = [
@@ -199,6 +200,9 @@ export default function Home() {
       const response: AxiosResponse = await api.post("/api/cart", {
         product_id: item.id 
       }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
         withCredentials: true 
       });
       const responseData: ServerResponseData = response.data;
@@ -224,6 +228,11 @@ export default function Home() {
       }
     }
     catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_QUANTITY_NOT_UPDATED) {
+          showToast("Product quantity can't be updated! Try again later.", "error");
+        }
+      }
       return showToast("An unexpected error occurred!", "error");
     }
   };
@@ -234,19 +243,46 @@ export default function Home() {
   };
   
   // Update item quantity in cart
-  const updateQuantity = (itemId: number, newQuantity: number) => {
+  const updateQuantity = async (itemId: number, newQuantity: number) => {
     if (newQuantity < 1) {
       removeFromCart(itemId);
       return;
     }
-    
-    setCart(prevCart => 
-      prevCart.map(cartItem => 
-        cartItem.item.id === itemId 
-          ? { ...cartItem, quantity: newQuantity } 
-          : cartItem
-      )
-    );
+
+    try {
+      const response: AxiosResponse = await api.patch("/api/cart", {
+        quantity: newQuantity,
+        product_id: itemId
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
+
+      const responseData: ServerResponseData = response.data;
+
+      if (responseData.success === true) {
+        setCart(prevCart => 
+          prevCart.map(cartItem => 
+            cartItem.item.id === itemId 
+              ? { ...cartItem, quantity: newQuantity } 
+              : cartItem
+          )
+        );
+      }
+    }
+    catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_DOES_NOT_EXIST) {
+          showToast("Product quantity can't be updated as it does not exist!", "error");
+        }
+        else if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_QUANTITY_NOT_UPDATED) {
+          showToast("Product quantity can't be updated! Try again later.", "error");
+        }
+      }
+      showToast("An unexpected error occured!", "error");
+    }
   };
   
   // Calculate total price of items in cart
