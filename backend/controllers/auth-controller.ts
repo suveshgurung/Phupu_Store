@@ -31,8 +31,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         return next(createError(401, "Invalid password!", ErrorCodes.ER_INVALID_PASS));
       }
 
-      const token = createToken(user.email);
-      const refreshToken = createRefreshToken(user.email);
+      const token: string = createToken(user.email);
+      const refreshToken: string = createRefreshToken(user.email);
 
       const [result] = await connection.query<any[]>(`
         INSERT INTO
