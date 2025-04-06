@@ -224,22 +224,48 @@ export default function Home() {
           }
         });
 
-        showToast("Item added to cart!", "success");
+        return showToast("Item added to cart!", "success");
       }
     }
     catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_QUANTITY_NOT_UPDATED) {
-          showToast("Product quantity can't be updated! Try again later.", "error");
+          return showToast("Product quantity can't be updated! Try again later.", "error");
         }
       }
-      return showToast("An unexpected error occurred!", "error");
+      else {
+        return showToast("An unexpected error occurred!", "error");
+      }
     }
   };
   
   // Remove item from cart
-  const removeFromCart = (itemId: number) => {
-    setCart(prevCart => prevCart.filter(cartItem => cartItem.item.id !== itemId));
+  const removeFromCart = async (itemId: number) => {
+    try {
+      const response: AxiosResponse = await api.delete(`/api/cart/${itemId}`, {
+        withCredentials: true
+      });
+
+      const responseData: ServerResponseData = response.data;
+
+      if (responseData.success === true) {
+        setCart(prevCart => prevCart.filter(cartItem => cartItem.item.id !== itemId));
+        return;
+      }
+    }
+    catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_DOES_NOT_EXIST) {
+          return showToast("The product is not added to be deleted!", "error");
+        }
+        else if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_NOT_DELETED) {
+          return showToast("The product could not be deleted!", "error");
+        }
+      }
+      else {
+        return showToast("An unexpected error occurred!", "error");
+      }
+    }
   };
   
   // Update item quantity in cart
@@ -275,13 +301,13 @@ export default function Home() {
     catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_DOES_NOT_EXIST) {
-          showToast("Product quantity can't be updated as it does not exist!", "error");
+          return showToast("Product quantity can't be updated. Product must be added first!", "error");
         }
         else if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_QUANTITY_NOT_UPDATED) {
-          showToast("Product quantity can't be updated! Try again later.", "error");
+          return showToast("Product quantity can't be updated! Try again later.", "error");
         }
       }
-      showToast("An unexpected error occured!", "error");
+      return showToast("An unexpected error occured!", "error");
     }
   };
   
@@ -357,7 +383,7 @@ export default function Home() {
                     setPriceRange([0, 20]);
                     setShowPopularOnly(false);
                   }}
-                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
                 >
                   Reset Filters
                 </button>

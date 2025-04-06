@@ -133,7 +133,7 @@ const addCartItems = async (req: RequestWithUser, res: Response, next: NextFunct
       res.status(200).json({
         success: true,
         statusCode: 200,
-        message: "Item added to cart!"
+        message: "Product added to cart!"
       });
     }
   }
@@ -151,6 +151,7 @@ const updateCartItems = async (req: RequestWithUser, res: Response, next: NextFu
   const { quantity, product_id } = req.body;
 
   try {
+    // Check if the product is available in the database.
     const [selectRows] = await connection.query(`
       SELECT
       *
@@ -166,6 +167,7 @@ const updateCartItems = async (req: RequestWithUser, res: Response, next: NextFu
       return next(createError(404, "The product does not exist!", ErrorCodes.ER_PRODUCT_DOES_NOT_EXIST));
     }
 
+    // Update the quantity of the product.
     const [updateResult] = await connection.query<ResultSetHeader>(`
       UPDATE
       user_cart
@@ -191,7 +193,7 @@ const updateCartItems = async (req: RequestWithUser, res: Response, next: NextFu
     res.status(200).json({
       success: true,
       statusCode: 200,
-      message: "Item quantity updated!"
+      message: "Product quantity updated!"
     });
   }
   catch (error: any) {
@@ -202,7 +204,61 @@ const updateCartItems = async (req: RequestWithUser, res: Response, next: NextFu
   }
 };
 
-const deleteCartItems = (req: RequestWithUser, res: Response, next: NextFunction) => {
+const deleteCartItems = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  const connection = await pool.getConnection();
+  const user = req.user;
+  const { product_id } = req.params;
+
+  try {
+    // Check if the product is available in the database.
+    const [selectRows] = await connection.query(`
+      SELECT
+      *
+      FROM
+      user_cart
+      WHERE
+      user_id=? AND product_id=?
+    `, [user?.id, product_id]);
+
+    const selectResult = selectRows as CartItemFromDatabase[];
+
+    if (selectResult.length === 0) {
+      return next(createError(404, "The product does not exist!", ErrorCodes.ER_PRODUCT_DOES_NOT_EXIST));
+    }
+
+    const [deleteResult] = await connection.query<ResultSetHeader>(`
+      DELETE
+      FROM
+      user_cart
+      WHERE
+      user_id=? AND product_id=?
+    `, [user?.id, product_id]);
+
+    if (deleteResult.affectedRows === 0) {
+      return next(createError(500, "Product could not be deleted!", ErrorCodes.ER_PRODUCT_NOT_DELETED));
+    }
+
+    if (req.token) {
+      res.cookie('token', req.token, {
+        httpOnly: true,
+        sameSite: 'strict',
+        maxAge: 20 * 60 * 1000,
+        path: '/'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Product deleted successfully!"
+    });
+  }
+  catch (error: any) {
+    return next(createError(500, error.message, ErrorCodes.ER_UNEXP));
+  }
+  finally {
+    connection.release();
+  }
 };
 
 export { getCartItems, addCartItems, updateCartItems, deleteCartItems };

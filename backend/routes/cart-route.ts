@@ -10,6 +10,6 @@ const router: Router = express.Router({
 router.get("/", requireAuth, getCartItems);
 router.post("/", requireAuth, addCartItems);
 router.patch("/", requireAuth, updateCartItems);
-router.delete("/", requireAuth, deleteCartItems);
+router.delete("/:product_id", requireAuth, deleteCartItems);
 
 export default router;
