@@ -14,11 +14,36 @@ interface Product {
 };
 
 const getAllProductDetails = async (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).json({
-    success: true,
-    statusCode: 200,
-    message: "Test"
-  });
+  const connection = await pool.getConnection();
+
+  try {
+    const [result] = await connection.query(`
+      SELECT
+      *
+      FROM
+      products
+    `);
+
+    const foodItems = result as Product[];
+
+    if (foodItems.length != 0) {
+      res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "Food items fetched successfully!",
+        data: foodItems
+      });
+    }
+    else {
+      return next(createError(500, "Food items could not be fetched!", ErrorCodes.ER_PRODUCT_NOT_FETCHED));
+    }
+  }
+  catch (error: any) {
+    return next(createError(500, error.message, ErrorCodes.ER_UNEXP));
+  }
+  finally {
+    connection.release();
+  }
 };
 
 const getProductDetails = async (req: Request, res: Response, next: NextFunction) => {
