@@ -169,7 +169,7 @@ export default function CartPage() {
               
               <div className="divide-y">
                 {cart.map((cartItem) => (
-                  <div key={cartItem.item.id} className="flex flex-col sm:flex-row items-start sm:items-center p-4 gap-4">
+                  <div key={cartItem.item.id} className="flex flex-row items-center p-4 gap-4">
                     <div className="relative w-24 h-24 rounded-lg overflow-hidden">
                       <Image
                         src={cartItem.item.product_image_url}
