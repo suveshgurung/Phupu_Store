@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { UserProvider } from "@/app/context/user-context";
-import { ToastProvider } from "@/app/context/toast-context";
-import { CartProvider } from "@/app/context/cart-context";
-import ClientLayout from "@/app/client-layout";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import { UserProvider } from '@/app/context/user-context';
+import { ToastProvider } from '@/app/context/toast-context';
+import { CartProvider } from '@/app/context/cart-context';
+import ClientLayout from '@/app/client-layout';
+import './globals.css';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

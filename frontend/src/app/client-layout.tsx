@@ -3,6 +3,7 @@
 import React from 'react';
 import Navbar from '@/app/ui/navbar';
 import Footer from '@/app/ui/footer';
+import CartButton from '@/app/ui/cart-button';
 import useUserContext from '@/app/hooks/use-user-context';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -16,6 +17,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <main className="w-full flex-grow pt-[70px]">
               {children}
             </main>
+            <CartButton />
           <Footer />
         </div>
       ) : (

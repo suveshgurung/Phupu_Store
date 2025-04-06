@@ -1,136 +1,28 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import axios, { AxiosResponse } from 'axios';
+import Link from 'next/link';
+import { ShoppingCart } from 'lucide-react';
 import HeroSection from '@/app/ui/hero-section';
 import CategoryFilter from '@/app/ui/category-filter';
 import FoodItem from '@/app/types/food-item';
-import CartItems from '@/app/types/cart-info';
 import ServerResponseCartData from '@/app/types/server-response-cart-data';
 import useUserContext from '@/app/hooks/use-user-context';
 import useToastContext from '@/app/hooks/use-toast-context';
+import useCartContext from '@/app/hooks/use-cart-context';
 import api from '@/app/utilities/api';
 import ServerResponseData from '@/app/types/server-response';
 import ErrorCodes from '@/app/types/error-codes';
 
-// Sample food items data
-const foodItems: FoodItem[] = [
-  {
-    id: 1,
-    name: "Classic Momo",
-    description: "Steamed dumplings filled with spiced minced meat or vegetables",
-    price: 8.99,
-    category: "Nepali",
-    imageUrl: "/api/placeholder/300/200",
-    popular: true
-  },
-  {
-    id: 2,
-    name: "Chicken Biryani",
-    description: "Fragrant basmati rice cooked with tender chicken and aromatic spices",
-    price: 12.99,
-    category: "Indian",
-    imageUrl: "/api/placeholder/300/200",
-    popular: true
-  },
-  {
-    id: 3,
-    name: "Veggie Chow Mein",
-    description: "Stir-fried noodles with fresh vegetables and savory sauce",
-    price: 9.99,
-    category: "Chinese",
-    imageUrl: "/api/placeholder/300/200",
-    popular: false
-  },
-  {
-    id: 4,
-    name: "Butter Chicken",
-    description: "Tender chicken cooked in a rich and creamy tomato-based sauce",
-    price: 14.99,
-    category: "Indian",
-    imageUrl: "/api/placeholder/300/200",
-    popular: true
-  },
-  {
-    id: 5,
-    name: "Spicy Thukpa",
-    description: "Hot and spicy noodle soup with vegetables and your choice of protein",
-    price: 10.99,
-    category: "Tibetan",
-    imageUrl: "/api/placeholder/300/200",
-    popular: false
-  },
-  {
-    id: 6,
-    name: "Dal Bhat",
-    description: "Traditional Nepali meal with lentil soup, rice, and various side dishes",
-    price: 16.99,
-    category: "Nepali",
-    imageUrl: "/api/placeholder/300/200",
-    popular: true
-  },
-  {
-    id: 7,
-    name: "Tandoori Chicken",
-    description: "Marinated chicken cooked in a traditional clay oven",
-    price: 13.99,
-    category: "Indian",
-    imageUrl: "/api/placeholder/300/200",
-    popular: false
-  },
-  {
-    id: 8,
-    name: "Vegetable Pakora",
-    description: "Mixed vegetables dipped in spiced chickpea batter and deep-fried",
-    price: 7.99,
-    category: "Indian",
-    imageUrl: "/api/placeholder/300/200",
-    popular: false
-  },
-  {
-    id: 9,
-    name: "Chicken Chilli",
-    description: "Crispy fried chicken tossed with bell peppers and spicy sauce",
-    price: 11.99,
-    category: "Nepali-Chinese",
-    imageUrl: "/api/placeholder/300/200",
-    popular: true
-  },
-  {
-    id: 10,
-    name: "Sel Roti",
-    description: "Traditional Nepali sweet ring-shaped rice bread",
-    price: 5.99,
-    category: "Nepali",
-    imageUrl: "/api/placeholder/300/200",
-    popular: false
-  },
-  {
-    id: 11,
-    name: "Aloo Paratha",
-    description: "Whole wheat flatbread stuffed with spiced mashed potatoes",
-    price: 6.99,
-    category: "Indian",
-    imageUrl: "/api/placeholder/300/200",
-    popular: false
-  },
-  {
-    id: 12,
-    name: "Samosa",
-    description: "Crispy pastry filled with spiced potatoes and peas",
-    price: 4.99,
-    category: "Indian",
-    imageUrl: "/api/placeholder/300/200",
-    popular: true
-  }
-];
-
 export default function Home() {
   // State for cart items
-  const [cart, setCart] = useState<CartItems[]>([]);
+  const { cart, setCart } = useCartContext();
   const [showCart, setShowCart] = useState<boolean>(false);
+
+  const [loading, setLoading] = useState<boolean>(true);
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   
   // State for search and filters
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -154,6 +46,36 @@ export default function Home() {
 
   const { user } = useUserContext();
   const { showToast } = useToastContext();
+
+  // Get the foodItems info.
+  useEffect(() => {
+    if (loading) {
+      const getFoodItems = async () => {
+        try {
+          const response: AxiosResponse = await api.get("/api/product");
+          const responseData: ServerResponseData<FoodItem[]> = response.data;
+
+          if (responseData.success === true) {
+            if (responseData.data) {
+              setFoodItems(responseData.data);
+              setLoading(false);
+            }
+          }
+        }
+        catch (error) {
+          if (axios.isAxiosError(error)) {
+            if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_NOT_FETCHED) {
+              return showToast("Error in fetching products!", "error");
+            }
+          }
+          else {
+            return showToast("An unexpected error occurred!", "error");
+          }
+        }
+      };
+      getFoodItems();
+    }
+  }, [loading, showToast]);
 
   // Get the user cart items.
   useEffect(() => {
@@ -187,7 +109,7 @@ export default function Home() {
     };
 
     getCartItems();
-  }, [user, showToast]);
+  }, [user, showToast, setCart, foodItems]);
   
   // Add item to cart
   const addToCart = async (item: FoodItem) => {
@@ -315,6 +237,14 @@ export default function Home() {
   const cartTotal = cart.reduce((total, cartItem) => 
     total + (cartItem.item.price * cartItem.quantity), 0
   );
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16 flex justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -338,38 +268,51 @@ export default function Home() {
                     key={item.id} 
                     className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
                   >
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        width={300}
-                        height={300}
-                        src={item.imageUrl} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover"
-                      />
-                      {item.popular && (
-                        <span className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
-                          Popular
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <div className="flex justify-between items-start">
-                        <h3 className="text-lg font-semibold">{item.name}</h3>
-                        <span className="text-red-600 font-medium">${item.price.toFixed(2)}</span>
+                    <Link
+                      href={`/product/${item.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      key={item.id}
+                      className="block flex flex-col h-full"
+                    >
+                      <div className="relative h-48 overflow-hidden">
+                        <Image
+                          src={item.product_image_url} 
+                          alt={item.name} 
+                          fill
+                          className="w-full h-full object-cover"
+                        />
+                        {item.popular && (
+                          <span className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
+                            Popular
+                          </span>
+                        )}
                       </div>
-                      <p className="text-gray-600 text-sm mt-2 line-clamp-2">{item.description}</p>
-                      <div className="mt-4 flex justify-between items-center">
-                        <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
-                          {item.category}
-                        </span>
-                        <button 
-                          onClick={() => addToCart(item)}
-                          className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:cursor-pointer transition-colors text-sm"
-                        >
-                          Add to Cart
-                        </button>
+
+                      <div className="p-4 flex flex-col flex-grow">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-lg font-semibold">{item.name}</h3>
+                          <span className="text-red-600 font-medium">${item.price.toFixed(2)}</span>
+                        </div>
+
+                        <p className="text-gray-600 text-sm line-clamp-2 h-10 mb-4">{item.description}</p>
+
+                        <div className="flex-grow"></div>
+
+                        <div className="mt-auto flex justify-between items-center">
+                          <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
+                            {item.category}
+                          </span>
+                          <button 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              addToCart(item);
+                            }}
+                            className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 hover:cursor-pointer transition-colors text-sm"
+                          >
+                            Add to Cart
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    </Link>
                   </div>
                 ))}
               </div>
@@ -394,21 +337,6 @@ export default function Home() {
       </section>
       
       {/* Cart Button */}
-      {user && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <button 
-            onClick={() => setShowCart(!showCart)}
-            className="relative flex items-center justify-center w-16 h-16 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 hover:cursor-pointer transition-colors"
-          >
-            <ShoppingCart size={24} />
-            {cart.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-yellow-500 text-xs text-white w-6 h-6 rounded-full flex items-center justify-center">
-              {cart.reduce((total, item) => total + item.quantity, 0)}
-              </span>
-            )}
-          </button>
-        </div>
-      )}
       
       {/* Cart Sidebar */}
       {showCart && (
@@ -418,7 +346,7 @@ export default function Home() {
             <div className="flex flex-col h-full">
               <div className="flex justify-between items-center p-4 border-b">
                 <h2 className="text-xl font-semibold">Your Cart</h2>
-                <button onClick={() => setShowCart(false)} className="text-gray-500 hover:text-gray-700">
+                <button onClick={() => setShowCart(false)} className="text-gray-500 hover:text-gray-700 cursor-pointer">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -433,7 +361,7 @@ export default function Home() {
                         <Image
                           width={200}
                           height={200}
-                          src={cartItem.item.imageUrl}
+                          src={cartItem.item.product_image_url}
                           alt={cartItem.item.name}
                           className="w-full h-full object-cover"
                         />
