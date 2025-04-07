@@ -91,9 +91,7 @@ export default function SignUp(): React.ReactElement {
         setLoading(false);
         showToast("Sign up successful!", "success");
 
-        setTimeout(() => {
-          router.push("/login");
-        }, 1000);
+        router.push("/login");
       }
     }
     catch (error: unknown) {

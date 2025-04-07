@@ -79,9 +79,7 @@ export default function Login(): React.ReactElement {
           const encryptedUserInfo = CryptoJS.AES.encrypt(JSON.stringify(responseData.data), secretKey).toString();
           Cookies.set("user", encryptedUserInfo, { expires: 7, secure: true, sameSite: "Strict" });
 
-          setTimeout(() => {
-            router.push("/");
-          }, 1000);
+          router.push("/");
         }
       }
       catch (error: unknown) {
@@ -135,9 +133,7 @@ export default function Login(): React.ReactElement {
           const encryptedUserInfo = CryptoJS.AES.encrypt(JSON.stringify(responseData.data), secretKey).toString();
           Cookies.set("user", encryptedUserInfo, { expires: 7, secure: true, sameSite: "Strict" });
 
-          setTimeout(() => {
-            router.push("/");
-          }, 1000);
+          router.push("/");
         }
       }
       catch (error: unknown) {
