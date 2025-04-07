@@ -124,7 +124,7 @@ export default function ProductDetailPage() {
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
           {error || 'Product not found'}
         </h2>
-        <Link href="/" className="text-red-600 hover:text-red-700 flex items-center justify-center gap-2">
+        <Link href="/" className="text-gray-600 hover:text-red-600 flex items-center justify-center gap-2">
           <ArrowLeft size={16} />
           Back to home page
         </Link>
@@ -134,7 +134,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 md:mt-14">
-      <Link href="/" className="inline-flex items-center text-red-600 hover:text-red-700 mb-6">
+      <Link href="/" className="inline-flex items-center text-gray-600 hover:text-red-600 mb-6">
         <ArrowLeft size={16} className="mr-2" />
         Back to home page
       </Link>
