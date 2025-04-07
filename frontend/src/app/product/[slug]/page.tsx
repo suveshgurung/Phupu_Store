@@ -21,7 +21,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
-  
+
   const { user } = useUserContext();
   const { showToast } = useToastContext();
   const { setCart } = useCartContext();
@@ -33,16 +33,16 @@ export default function ProductDetailPage() {
 
         const response: AxiosResponse = await api.get(`/api/product/${slug}`);
         const responseData: ServerResponseData<FoodItem> = response.data;
-        
+
         if (responseData.success && responseData.data) {
           setProduct(responseData.data);
         } else {
           setError('Product not found');
         }
-      } 
+      }
       catch (error) {
         setError('Failed to load product details');
-      } 
+      }
       finally {
         setLoading(false);
       }
@@ -57,7 +57,7 @@ export default function ProductDetailPage() {
     if (!user) {
       return showToast("You must be logged in!", "warning");
     }
-    
+
     if (!product) return;
 
     try {
@@ -69,9 +69,9 @@ export default function ProductDetailPage() {
         headers: {
           'Content-Type': 'application/json'
         },
-        withCredentials: true 
+        withCredentials: true
       });
-      
+
       const responseData: ServerResponseData = response.data;
 
       if (responseData.success === true) {
@@ -80,12 +80,12 @@ export default function ProductDetailPage() {
           // check if the item already exists in cart.
           const existingItem = prevCart.find(cartItem => cartItem.item.id === product.id);
           if (existingItem) {
-            return prevCart.map(cartItem => 
-              cartItem.item.id === product.id 
-                ? { ...cartItem, quantity: quantity } 
+            return prevCart.map(cartItem =>
+              cartItem.item.id === product.id
+                ? { ...cartItem, quantity: quantity }
                 : cartItem
             );
-          } 
+          }
           else {
             return [...prevCart, { product, quantity: quantity }];
           }
@@ -138,7 +138,7 @@ export default function ProductDetailPage() {
         <ArrowLeft size={16} className="mr-2" />
         Back to home page
       </Link>
-      
+
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="md:flex">
           {/* Product Image */}
@@ -157,7 +157,7 @@ export default function ProductDetailPage() {
               )}
             </div>
           </div>
-          
+
           {/* Product Info */}
           <div className="md:w-1/2 p-6 md:p-8">
             <div className="mb-2">
@@ -174,19 +174,19 @@ export default function ProductDetailPage() {
             <p className="text-gray-600 mb-6">
               {product.description}
             </p>
-            
+
             {/* Quantity selector */}
             <div className="flex items-center mb-6">
               <span className="mr-4 font-medium">Quantity:</span>
               <div className="flex items-center border rounded-md">
-                <button 
+                <button
                   onClick={decrementQuantity}
                   className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                 >
                   <Minus size={16} />
                 </button>
                 <span className="px-4 py-2 border-l border-r">{quantity}</span>
-                <button 
+                <button
                   onClick={incrementQuantity}
                   className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                 >
@@ -194,7 +194,7 @@ export default function ProductDetailPage() {
                 </button>
               </div>
             </div>
-            
+
             {/* Add to cart button */}
             <button
               onClick={handleAddToCart}

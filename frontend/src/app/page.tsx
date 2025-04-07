@@ -21,7 +21,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20]);
   const [showPopularOnly, setShowPopularOnly] = useState<boolean>(false);
-  
+
   const { setCart } = useCartContext();
   const { foodItems } = useFoodItemsContext();
   const { user } = useUserContext();
@@ -36,12 +36,12 @@ export default function Home() {
     // Update cart data in backend.
     try {
       const response: AxiosResponse = await api.post("/api/cart", {
-        product_id: item.id 
+        product_id: item.id
       }, {
         headers: {
           'Content-Type': 'application/json'
         },
-        withCredentials: true 
+        withCredentials: true
       });
       const responseData: ServerResponseData = response.data;
 
@@ -51,12 +51,12 @@ export default function Home() {
           // check if the item already exists in cart.
           const existingItem = prevCart.find(cartItem => cartItem.item.id === item.id);
           if (existingItem) {
-            return prevCart.map(cartItem => 
-              cartItem.item.id === item.id 
-                ? { ...cartItem, quantity: cartItem.quantity + 1 } 
+            return prevCart.map(cartItem =>
+              cartItem.item.id === item.id
+                ? { ...cartItem, quantity: cartItem.quantity + 1 }
                 : cartItem
             );
-          } 
+          }
           else {
             return [...prevCart, { item, quantity: 1 }];
           }
@@ -76,7 +76,7 @@ export default function Home() {
       }
     }
   };
-  
+
   // Remove item from cart
   // const removeFromCart = async (itemId: number) => {
   //   try {
@@ -105,7 +105,7 @@ export default function Home() {
   //     }
   //   }
   // };
-  
+
   // Update item quantity in cart
   // const updateQuantity = async (itemId: number, newQuantity: number) => {
   //   if (newQuantity < 1) {
@@ -159,38 +159,38 @@ export default function Home() {
 
   // Get unique categories for filter dropdown
   const categories = ['All', ...Array.from(new Set(foodItems.map(item => item.category)))];
-  
+
   // Filter food items based on search, category, and price
   const filteredItems = foodItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          item.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
     const matchesPrice = item.price >= priceRange[0] && item.price <= priceRange[1];
     const matchesPopular = showPopularOnly ? item.popular : true;
-    
+
     return matchesSearch && matchesCategory && matchesPrice && matchesPopular;
   });
-  
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <HeroSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      
+
       {/* Filters and food menu section */}
       <section className="container mx-auto px-4 py-8">
         <h2 className="text-2xl md:text-3xl font-bold mb-6">Our Menu</h2>
-        
+
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Sidebar - Category Filters */}
           <CategoryFilter setSearchTerm={setSearchTerm} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} priceRange={priceRange} setPriceRange={setPriceRange} showPopularOnly={showPopularOnly} setShowPopularOnly={setShowPopularOnly} categories={categories} />
-          
+
           {/* Right Content - Food Items Grid */}
           <div className="w-full md:w-3/4 lg:w-4/5">
             {filteredItems.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredItems.map((item) => (
-                  <div 
-                    key={item.id} 
+                  <div
+                    key={item.id}
                     className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
                   >
                     <Link
@@ -200,8 +200,8 @@ export default function Home() {
                     >
                       <div className="relative h-48 overflow-hidden">
                         <Image
-                          src={item.product_image_url} 
-                          alt={item.name} 
+                          src={item.product_image_url}
+                          alt={item.name}
                           fill
                           className="w-full h-full object-cover"
                         />
@@ -226,7 +226,7 @@ export default function Home() {
                           <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
                             {item.category}
                           </span>
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.preventDefault();
                               addToCart(item);
@@ -244,7 +244,7 @@ export default function Home() {
             ) : (
               <div className="text-center py-16 bg-white rounded-lg shadow-md">
                 <p className="text-gray-500 text-lg">No items found matching your criteria.</p>
-                <button 
+                <button
                   onClick={() => {
                     setSearchTerm('');
                     setSelectedCategory('All');
