@@ -1,114 +1,32 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import axios, { AxiosResponse } from 'axios';
 import Link from 'next/link';
 import HeroSection from '@/app/ui/hero-section';
 import CategoryFilter from '@/app/ui/category-filter';
 import FoodItem from '@/app/types/food-item';
-import ServerResponseCartData from '@/app/types/server-response-cart-data';
+import ServerResponseData from '@/app/types/server-response';
+import ErrorCodes from '@/app/types/error-codes';
 import useUserContext from '@/app/hooks/use-user-context';
 import useToastContext from '@/app/hooks/use-toast-context';
 import useCartContext from '@/app/hooks/use-cart-context';
+import useFoodItemsContext from '@/app/hooks/use-food-items-context';
 import api from '@/app/utilities/api';
-import ServerResponseData from '@/app/types/server-response';
-import ErrorCodes from '@/app/types/error-codes';
 
 export default function Home() {
-  // State for cart items
-  const { cart, setCart } = useCartContext();
-
-  const [loading, setLoading] = useState<boolean>(true);
-  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-  
   // State for search and filters
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20]);
   const [showPopularOnly, setShowPopularOnly] = useState<boolean>(false);
   
-  // Get unique categories for filter dropdown
-  const categories = ['All', ...Array.from(new Set(foodItems.map(item => item.category)))];
-  
-  // Filter food items based on search, category, and price
-  const filteredItems = foodItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          item.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
-    const matchesPrice = item.price >= priceRange[0] && item.price <= priceRange[1];
-    const matchesPopular = showPopularOnly ? item.popular : true;
-    
-    return matchesSearch && matchesCategory && matchesPrice && matchesPopular;
-  });
-
+  const { setCart } = useCartContext();
+  const { foodItems } = useFoodItemsContext();
   const { user } = useUserContext();
   const { showToast } = useToastContext();
 
-  // Get the foodItems info.
-  useEffect(() => {
-    if (loading) {
-      const getFoodItems = async () => {
-        try {
-          const response: AxiosResponse = await api.get("/api/product");
-          const responseData: ServerResponseData<FoodItem[]> = response.data;
-
-          if (responseData.success === true) {
-            if (responseData.data) {
-              setFoodItems(responseData.data);
-              setLoading(false);
-            }
-          }
-        }
-        catch (error) {
-          if (axios.isAxiosError(error)) {
-            if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_NOT_FETCHED) {
-              return showToast("Error in fetching products!", "error");
-            }
-          }
-          else {
-            return showToast("An unexpected error occurred!", "error");
-          }
-        }
-      };
-      getFoodItems();
-    }
-  }, [loading, showToast]);
-
-  // Get the user cart items.
-  useEffect(() => {
-    const getCartItems = async () => {
-      if (user) {
-        try {
-          const response: AxiosResponse = await api.get("/api/cart", {
-            withCredentials: true,
-          });
-
-          const responseData: ServerResponseData<ServerResponseCartData[]> = response.data;
-
-          if (responseData.success === true) {
-            const cartData = responseData.data?.map(({ product_id, quantity }) => {
-              const item = foodItems.find(food => food.id === product_id);
-              if (!item) {
-                return null;
-              }
-
-              return { item, quantity };
-            })
-            .filter(Boolean) as { item: FoodItem, quantity: number }[];
-
-            setCart(cartData);
-          }
-        }
-        catch (error: unknown) {
-          return showToast("An unexpected error occured!", "error");
-        }
-      }
-    };
-
-    getCartItems();
-  }, [user, showToast, setCart, foodItems]);
-  
   // Add item to cart
   const addToCart = async (item: FoodItem) => {
     if (!user) {
@@ -160,84 +78,98 @@ export default function Home() {
   };
   
   // Remove item from cart
-  const removeFromCart = async (itemId: number) => {
-    try {
-      const response: AxiosResponse = await api.delete(`/api/cart/${itemId}`, {
-        withCredentials: true
-      });
-
-      const responseData: ServerResponseData = response.data;
-
-      if (responseData.success === true) {
-        setCart(prevCart => prevCart.filter(cartItem => cartItem.item.id !== itemId));
-        return;
-      }
-    }
-    catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_DOES_NOT_EXIST) {
-          return showToast("The product is not added to be deleted!", "error");
-        }
-        else if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_NOT_DELETED) {
-          return showToast("The product could not be deleted!", "error");
-        }
-      }
-      else {
-        return showToast("An unexpected error occurred!", "error");
-      }
-    }
-  };
+  // const removeFromCart = async (itemId: number) => {
+  //   try {
+  //     const response: AxiosResponse = await api.delete(`/api/cart/${itemId}`, {
+  //       withCredentials: true
+  //     });
+  //
+  //     const responseData: ServerResponseData = response.data;
+  //
+  //     if (responseData.success === true) {
+  //       setCart(prevCart => prevCart.filter(cartItem => cartItem.item.id !== itemId));
+  //       return;
+  //     }
+  //   }
+  //   catch (error) {
+  //     if (axios.isAxiosError(error)) {
+  //       if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_DOES_NOT_EXIST) {
+  //         return showToast("The product is not added to be deleted!", "error");
+  //       }
+  //       else if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_NOT_DELETED) {
+  //         return showToast("The product could not be deleted!", "error");
+  //       }
+  //     }
+  //     else {
+  //       return showToast("An unexpected error occurred!", "error");
+  //     }
+  //   }
+  // };
   
   // Update item quantity in cart
-  const updateQuantity = async (itemId: number, newQuantity: number) => {
-    if (newQuantity < 1) {
-      removeFromCart(itemId);
-      return;
-    }
+  // const updateQuantity = async (itemId: number, newQuantity: number) => {
+  //   if (newQuantity < 1) {
+  //     removeFromCart(itemId);
+  //     return;
+  //   }
+  //
+  //   try {
+  //     const response: AxiosResponse = await api.patch("/api/cart", {
+  //       quantity: newQuantity,
+  //       product_id: itemId
+  //     }, {
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       withCredentials: true
+  //     });
+  //
+  //     const responseData: ServerResponseData = response.data;
+  //
+  //     if (responseData.success === true) {
+  //       setCart(prevCart => 
+  //         prevCart.map(cartItem => 
+  //           cartItem.item.id === itemId 
+  //             ? { ...cartItem, quantity: newQuantity } 
+  //             : cartItem
+  //         )
+  //       );
+  //     }
+  //   }
+  //   catch (error) {
+  //     if (axios.isAxiosError(error)) {
+  //       if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_DOES_NOT_EXIST) {
+  //         return showToast("Product quantity can't be updated. Product must be added first!", "error");
+  //       }
+  //       else if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_QUANTITY_NOT_UPDATED) {
+  //         return showToast("Product quantity can't be updated! Try again later.", "error");
+  //       }
+  //     }
+  //     return showToast("An unexpected error occured!", "error");
+  //   }
+  // };
 
-    try {
-      const response: AxiosResponse = await api.patch("/api/cart", {
-        quantity: newQuantity,
-        product_id: itemId
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
-      });
-
-      const responseData: ServerResponseData = response.data;
-
-      if (responseData.success === true) {
-        setCart(prevCart => 
-          prevCart.map(cartItem => 
-            cartItem.item.id === itemId 
-              ? { ...cartItem, quantity: newQuantity } 
-              : cartItem
-          )
-        );
-      }
-    }
-    catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_DOES_NOT_EXIST) {
-          return showToast("Product quantity can't be updated. Product must be added first!", "error");
-        }
-        else if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_QUANTITY_NOT_UPDATED) {
-          return showToast("Product quantity can't be updated! Try again later.", "error");
-        }
-      }
-      return showToast("An unexpected error occured!", "error");
-    }
-  };
-
-  if (loading) {
+  if (!foodItems) {
     return (
       <div className="container mx-auto px-4 py-16 flex justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
       </div>
     );
   }
+
+  // Get unique categories for filter dropdown
+  const categories = ['All', ...Array.from(new Set(foodItems.map(item => item.category)))];
+  
+  // Filter food items based on search, category, and price
+  const filteredItems = foodItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          item.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+    const matchesPrice = item.price >= priceRange[0] && item.price <= priceRange[1];
+    const matchesPopular = showPopularOnly ? item.popular : true;
+    
+    return matchesSearch && matchesCategory && matchesPrice && matchesPopular;
+  });
   
   return (
     <div className="flex flex-col min-h-screen">

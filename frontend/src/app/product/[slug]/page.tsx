@@ -8,6 +8,7 @@ import { ArrowLeft, ShoppingCart, Plus, Minus } from 'lucide-react';
 import api from '@/app/utilities/api';
 import useUserContext from '@/app/hooks/use-user-context';
 import useToastContext from '@/app/hooks/use-toast-context';
+import useCartContext from '@/app/hooks/use-cart-context';
 import axios, { AxiosResponse } from 'axios';
 import FoodItem from '@/app/types/food-item';
 import ServerResponseData from '@/app/types/server-response';
@@ -23,6 +24,7 @@ export default function ProductDetailPage() {
   
   const { user } = useUserContext();
   const { showToast } = useToastContext();
+  const { setCart } = useCartContext();
 
   useEffect(() => {
     const fetchProductDetail = async () => {
@@ -73,6 +75,21 @@ export default function ProductDetailPage() {
       const responseData: ServerResponseData = response.data;
 
       if (responseData.success === true) {
+        // update the cart state variable.
+        setCart(prevCart => {
+          // check if the item already exists in cart.
+          const existingItem = prevCart.find(cartItem => cartItem.item.id === product.id);
+          if (existingItem) {
+            return prevCart.map(cartItem => 
+              cartItem.item.id === product.id 
+                ? { ...cartItem, quantity: quantity } 
+                : cartItem
+            );
+          } 
+          else {
+            return [...prevCart, { product, quantity: quantity }];
+          }
+        });
         showToast(`${quantity} ${quantity > 1 ? 'items' : 'item'} added to cart!`, "success");
       }
     } catch (error) {
