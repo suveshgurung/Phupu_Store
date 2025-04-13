@@ -98,7 +98,7 @@ export default function CartPage() {
   const removeFromCart = async (itemId: number) => {
     try {
       const response: AxiosResponse = await api.delete(`/api/cart/${itemId}`, {
-        withCredentials: true
+        withCredentials: true,
       });
 
       const responseData: ServerResponseData = response.data;
@@ -209,30 +209,31 @@ export default function CartPage() {
     setProcessingOrder(true);
     
     try {
-      // Here you would implement the actual order placement logic
-      // This would typically involve an API call to your backend
-      // If there's a payment screenshot, you'd upload it as well
+      const simplifiedCartItems = cart.map(cartItem => ({
+        product_id: cartItem.item.id,
+        quantity: cartItem.quantity,
+      }));
       
-      // Example of form data for file upload (commented out as it's just an example)
-      // const formData = new FormData();
-      // formData.append('paymentMethod', paymentMethod);
-      // formData.append('fullName', fullName);
-      // formData.append('email', email);
-      // formData.append('phone', phone);
-      // formData.append('district', district);
-      // formData.append('address', address);
-      // formData.append('landmark', landmark);
-      // if (paymentScreenshot) {
-      //   formData.append('paymentScreenshot', paymentScreenshot);
-      // }
-      // formData.append('cartItems', JSON.stringify(cart));
+      const formData = new FormData();
+      formData.append('full_name', fullName);
+      formData.append('email', email);
+      formData.append('phone', phone);
+      formData.append('payment_method', paymentMethod);
+      formData.append('district', district);
+      formData.append('address', address);
+      formData.append('landmark', landmark);
+      if (paymentScreenshot) {
+        formData.append('payment_screenshot', paymentScreenshot);
+      }
+      formData.append('cart_items', JSON.stringify(simplifiedCartItems));
       
-      // Simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await api.post("/api/place-order", formData, {
+        withCredentials: true
+      });
       
       // On success:
       showToast("Order placed successfully!", "success");
-      setCart([]);
+      // setCart([]);
       
       // Redirect to order confirmation page (you'd need to create this)
       // router.push('/order-confirmation');
