@@ -1,5 +1,7 @@
 import { Response, NextFunction } from 'express';
+import { format } from 'util';
 import ShortUniqueId from 'short-unique-id';
+import admin from '../utilities/firebase-admin-sdk';
 import pool from '../utilities/database-connection';
 import createError from '../utilities/create-error';
 import RequestWithUser from '../types/request-with-user';
@@ -20,24 +22,41 @@ const placeOrder = async (req: RequestWithUser, res: Response, next: NextFunctio
   const uid = new ShortUniqueId({ length: 32 });
 
   try {
-    let fileUrl: string | null = null;
     if (req.file) {
-      fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-    }
-    const randomOrderId = uid.rnd();
+      const firebaseFileName = `${Date.now()}-${req.file.originalname}`;
+      const bucket = admin.storage().bucket();
+      const blob = bucket.file(`phupu_store/payment_screenshots/${firebaseFileName}`);
 
-    if (fileUrl) {
-      cartItems.map(async (item) => {
-        const [result] = await connection.query<any[]>(`
-          INSERT
-          INTO
-          order_details(order_id, user_id, product_id, quantity, full_name, email, phone_number, payment_method, district, address, landmark, payment_screenshot)
-          VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [randomOrderId, user?.id, item.product_id, item.quantity, full_name, email, phone_number, payment_method, district, address, landmark ? landmark : null, fileUrl]);
+      const blobStream = blob.createWriteStream({
+        metadata: {
+          contentType: req.file.mimetype
+        }
       });
+
+      blobStream.on('error', (error) => {
+        return next(createError(500, "Unable to upload payment screenshot!", ErrorCodes.ER_FILE_NOT_UPLOADED));
+      });
+      blobStream.on('finish', async () => {
+        await blob.makePublic();
+
+        const publicUrl = format(`https://storage.googleapis.com/${bucket.name}/${blob.name}`);
+
+        cartItems.map(async (item) => {
+          const randomOrderId = uid.rnd();
+          const [result] = await connection.query<any[]>(`
+            INSERT
+            INTO
+            order_details(order_id, user_id, product_id, quantity, full_name, email, phone_number, payment_method, district, address, landmark, payment_screenshot)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `, [randomOrderId, user?.id, item.product_id, item.quantity, full_name, email, phone_number, payment_method, district, address, landmark ? landmark : null, publicUrl]);
+        });
+      });
+
+      blobStream.end(req.file.buffer);
     }
     else {
       cartItems.map(async (item) => {
+        const randomOrderId = uid.rnd();
         const [result] = await connection.query<any[]>(`
           INSERT
           INTO

@@ -2,7 +2,6 @@ import multer from 'multer';
 import createError from '../utilities/create-error';
 import ErrorCodes from '../types/error-codes';
 
-// TODO: add firebase api for uploading into firebase.
 const storage = multer.memoryStorage();
 
 const upload = multer({ 
