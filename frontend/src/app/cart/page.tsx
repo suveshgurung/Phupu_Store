@@ -285,11 +285,7 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 mb-16">
-      <div className="flex items-center mb-8">
-        <Link href="/" className="flex items-center text-gray-600 hover:text-red-600 transition-colors">
-          <ArrowLeft className="mr-2" size={20} />
-          <span>Continue Shopping</span>
-        </Link>
+      <div className="text-center mb-8">
         <h1 className="text-2xl md:text-3xl font-bold ml-auto">Checkout</h1>
       </div>
 
@@ -633,7 +629,7 @@ export default function CartPage() {
       ) : (
         <div className="bg-white shadow-md rounded-lg p-8 flex flex-col items-center justify-center">
           <Image
-            src="/api/placeholder/200/200" 
+            src="/empty-cart.png" 
             alt="Empty cart" 
             width={200}
             height={200}
