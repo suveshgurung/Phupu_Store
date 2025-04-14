@@ -1,32 +1,19 @@
 import multer from 'multer';
-import { Request } from 'express';
+import createError from '../utilities/create-error';
+import ErrorCodes from '../types/error-codes';
 
-const storage = multer.diskStorage({
-  destination: function (
-    req: Request, 
-    file: Express.Multer.File, 
-    cb: (error: Error | null, destination: string) => void
-  ) {
-    cb(null, './uploads/');
-  },
-  filename: function (
-    req: Request, 
-    file: Express.Multer.File, 
-    cb: (error: Error | null, filename: string) => void
-  ) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
+// TODO: add firebase api for uploading into firebase.
+const storage = multer.memoryStorage();
 
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024 },  // 5MB limit
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     }
     else {
-      cb(new Error('Only images allowed'));
+      cb(createError(400, "File should be an image.", ErrorCodes.ER_FILE_NOT_IMAGE));
     }
   },
 });

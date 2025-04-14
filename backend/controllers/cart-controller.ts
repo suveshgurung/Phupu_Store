@@ -214,7 +214,7 @@ const deleteCart = async (req: RequestWithUser, res: Response, next: NextFunctio
   const user = req.user;
 
   try {
-    const [result] = await connection.query(`
+    const [result] = await connection.query<ResultSetHeader>(`
       DELETE
       FROM
       user_cart
@@ -222,7 +222,10 @@ const deleteCart = async (req: RequestWithUser, res: Response, next: NextFunctio
       user_id=?
     `, [user?.id]);
 
-    console.log(result);
+
+    if (result.affectedRows === 0) {
+      return next(createError(500, "No item to be deleted!", ErrorCodes.ER_PRODUCT_NOT_DELETED));
+    }
 
     res.status(200).json({
       success: true,

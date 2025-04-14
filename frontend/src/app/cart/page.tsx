@@ -260,6 +260,9 @@ export default function CartPage() {
         else if (error.response?.data.errorCode === ErrorCodes.ER_FORBIDDEN) {
           showToast("Log out and try again.", "warning");
         }
+        else if (error.response?.data.errorCode === ErrorCodes.ER_PRODUCT_NOT_DELETED) {
+          showToast("No item to be deleted!", "error");
+        }
         else {
           showToast("Failed to place order. Please try again.", "error");
         }
