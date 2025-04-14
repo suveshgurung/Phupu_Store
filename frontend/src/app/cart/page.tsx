@@ -217,7 +217,7 @@ export default function CartPage() {
       const formData = new FormData();
       formData.append('full_name', fullName);
       formData.append('email', email);
-      formData.append('phone', phone);
+      formData.append('phone_number', phone);
       formData.append('payment_method', paymentMethod);
       formData.append('district', district);
       formData.append('address', address);
@@ -227,18 +227,46 @@ export default function CartPage() {
       }
       formData.append('cart_items', JSON.stringify(simplifiedCartItems));
       
-      await api.post("/api/place-order", formData, {
+      const response: AxiosResponse = await api.post("/api/place-order", formData, {
         withCredentials: true
       });
-      
-      // On success:
-      showToast("Order placed successfully!", "success");
-      // setCart([]);
+
+      const responseData: ServerResponseData = response.data;
+
+      if (responseData.success === true) {
+        // delete the items from the user cart.
+        try {
+          const deleteResponse: AxiosResponse = await api.delete("/api/cart", {
+            withCredentials: true,
+          });
+          const deleteResponseData: ServerResponseData = deleteResponse.data;
+
+          if (deleteResponseData.success === true) {
+            showToast("Order placed successfully!", "success");
+          }
+        }
+        catch (error) {
+          throw error;
+        }
+      }
       
       // Redirect to order confirmation page (you'd need to create this)
       // router.push('/order-confirmation');
     } catch (error) {
-      showToast("Failed to place order. Please try again.", "error");
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data.errorCode === ErrorCodes.ER_UNAUTHORIZED) {
+          showToast("Login to place an order.", "warning");
+        }
+        else if (error.response?.data.errorCode === ErrorCodes.ER_FORBIDDEN) {
+          showToast("Log out and try again.", "warning");
+        }
+        else {
+          showToast("Failed to place order. Please try again.", "error");
+        }
+      }
+      else {
+        showToast("Failed to place order. Please try again.", "error");
+      }
     } finally {
       setProcessingOrder(false);
     }
