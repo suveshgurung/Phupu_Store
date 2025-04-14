@@ -209,6 +209,35 @@ const updateCartItems = async (req: RequestWithUser, res: Response, next: NextFu
   }
 };
 
+const deleteCart = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  const connection = await pool.getConnection();
+  const user = req.user;
+
+  try {
+    const [result] = await connection.query(`
+      DELETE
+      FROM
+      user_cart
+      WHERE
+      user_id=?
+    `, [user?.id]);
+
+    console.log(result);
+
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Items deleted successfully!"
+    });
+  }
+  catch (error: any) {
+    return next(createError(500, error.message, ErrorCodes.ER_UNEXP));
+  }
+  finally {
+    connection.release();
+  }
+};
+
 const deleteCartItems = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   const connection = await pool.getConnection();
   const user = req.user;
@@ -266,4 +295,4 @@ const deleteCartItems = async (req: RequestWithUser, res: Response, next: NextFu
   }
 };
 
-export { getCartItems, addCartItems, updateCartItems, deleteCartItems };
+export { getCartItems, addCartItems, updateCartItems, deleteCart, deleteCartItems };
