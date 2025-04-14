@@ -38,6 +38,9 @@ importers:
       nodemon:
         specifier: ^3.1.9
         version: 3.1.9
+      short-unique-id:
+        specifier: ^5.2.2
+        version: 5.2.2
     devDependencies:
       '@types/bcrypt':
         specifier: ^5.0.2
@@ -771,6 +774,10 @@ packages:
 
   setprototypeof@1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
+
+  short-unique-id@5.2.2:
+    resolution: {integrity: sha512-MlRVyT5RYfDO2kUzBgOPlZriRzG+NIAuwSy1HBN8tahXyFi3+804GGi/mzjUsi6VxgiQuDgMnhoI2FqmSHX8Tg==}
+    hasBin: true
 
   side-channel-list@1.0.0:
     resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
@@ -1662,6 +1669,8 @@ snapshots:
   set-blocking@2.0.0: {}
 
   setprototypeof@1.2.0: {}
+
+  short-unique-id@5.2.2: {}
 
   side-channel-list@1.0.0:
     dependencies:

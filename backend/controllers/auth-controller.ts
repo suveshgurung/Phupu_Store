@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
+import ShortUniqueId from 'short-unique-id';
 import pool from '../utilities/database-connection';
 import createError from '../utilities/create-error';
 import ErrorCodes from '../types/error-codes';
-import LoginData from '../types/login-data-type';
-import SignupData from '../types/signup-data-type';
 import { createToken, createRefreshToken } from '../utilities/token-generator';
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
@@ -36,7 +35,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
       const [result] = await connection.query<any[]>(`
         INSERT INTO
-        user_refresh_token_list(id, refresh_token)
+        user_refresh_token_list(user_id, refresh_token)
         VALUES(?, ?)
       `, [user.id, refreshToken]);
 
@@ -81,12 +80,12 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         return next(createError(401, "Invalid password!", ErrorCodes.ER_INVALID_PASS));
       }
       
-      const token = createToken(user.email);
-      const refreshToken = createRefreshToken(user.email);
+      const token: string = createToken(user.email);
+      const refreshToken: string = createRefreshToken(user.email);
 
       const [result] = await connection.query<any[]>(`
         INSERT INTO
-        user_refresh_token_list(id, refresh_token)
+        user_refresh_token_list(user_id, refresh_token)
         VALUES(?, ?)
       `, [user.id, refreshToken]);
 
@@ -141,11 +140,14 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    const uid = new ShortUniqueId({ length: 16 });
+    const randomUserId = uid.rnd();
+
     try {
       const [result] = await connection.query<any>(`
         INSERT INTO
-        users(name, email, password, phone_number)
-        VALUES(?, ?, ?, ?)`, [full_name, email, hashedPassword, phone_number]);
+        users(id, name, email, password, phone_number)
+        VALUES(?, ?, ?, ?, ?)`, [randomUserId, full_name, email, hashedPassword, phone_number]);
 
         res.status(200).json({
           success: true,
@@ -175,7 +177,7 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
       FROM
       user_refresh_token_list
       WHERE
-      id=?
+      user_id=?
     `, [id]);
 
     res.clearCookie("token");
