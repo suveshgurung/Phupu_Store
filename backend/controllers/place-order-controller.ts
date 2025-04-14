@@ -1,4 +1,5 @@
 import { Response, NextFunction } from 'express';
+import ShortUniqueId from 'short-unique-id';
 import pool from '../utilities/database-connection';
 import createError from '../utilities/create-error';
 import RequestWithUser from '../types/request-with-user';
@@ -16,20 +17,23 @@ const placeOrder = async (req: RequestWithUser, res: Response, next: NextFunctio
   const connection = await pool.getConnection();
   const user = req.user;
 
+  const uid = new ShortUniqueId({ length: 32 });
+
   try {
     let fileUrl: string | null = null;
     if (req.file) {
       fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
     }
+    const randomOrderId = uid.rnd();
 
     if (fileUrl) {
       cartItems.map(async (item) => {
         const [result] = await connection.query<any[]>(`
           INSERT
           INTO
-          order_details(user_id, product_id, quantity, full_name, email, phone_number, payment_method, district, address, landmark, payment_screenshot)
-          VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [user?.id, item.product_id, item.quantity, full_name, email, phone_number, payment_method, district, address, landmark ? landmark : null, fileUrl]);
+          order_details(order_id, user_id, product_id, quantity, full_name, email, phone_number, payment_method, district, address, landmark, payment_screenshot)
+          VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [randomOrderId, user?.id, item.product_id, item.quantity, full_name, email, phone_number, payment_method, district, address, landmark ? landmark : null, fileUrl]);
       });
     }
     else {
@@ -37,9 +41,9 @@ const placeOrder = async (req: RequestWithUser, res: Response, next: NextFunctio
         const [result] = await connection.query<any[]>(`
           INSERT
           INTO
-          order_details(user_id, product_id, quantity, full_name, email, phone_number, payment_method, district, address, landmark)
-          VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [user?.id, item.product_id, item.quantity, full_name, email, phone_number, payment_method, district, address, landmark ? landmark : null]);
+          order_details(order_id, user_id, product_id, quantity, full_name, email, phone_number, payment_method, district, address, landmark)
+          VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [randomOrderId, user?.id, item.product_id, item.quantity, full_name, email, phone_number, payment_method, district, address, landmark ? landmark : null]);
       });
     }
 
