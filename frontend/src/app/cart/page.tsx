@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Minus, Plus, ArrowLeft, Truck, Wallet, Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { X, Minus, Plus, Truck, Wallet, Upload } from 'lucide-react';
 import Link from 'next/link';
 import useCartContext from '@/app/hooks/use-cart-context';
 import useUserContext from '@/app/hooks/use-user-context';
@@ -13,6 +14,7 @@ import ErrorCodes from '@/app/types/error-codes';
 import ServerResponseData from '@/app/types/server-response';
 
 export default function CartPage() {
+  const router = useRouter();
   const { cart, setCart } = useCartContext();
   const { user } = useUserContext();
   const { showToast } = useToastContext();
@@ -234,24 +236,12 @@ export default function CartPage() {
       const responseData: ServerResponseData = response.data;
 
       if (responseData.success === true) {
-        // delete the items from the user cart.
-        try {
-          const deleteResponse: AxiosResponse = await api.delete("/api/cart", {
-            withCredentials: true,
-          });
-          const deleteResponseData: ServerResponseData = deleteResponse.data;
+        showToast("Order placed successfully!", "success");
 
-          if (deleteResponseData.success === true) {
-            showToast("Order placed successfully!", "success");
-          }
-        }
-        catch (error) {
-          throw error;
-        }
+        // to indicate /checkout was naviagated from cart page.
+        sessionStorage.setItem("fromCartPage", "true");
+        router.push("/checkout");
       }
-      
-      // Redirect to order confirmation page (you'd need to create this)
-      // router.push('/order-confirmation');
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.data.errorCode === ErrorCodes.ER_UNAUTHORIZED) {
@@ -345,8 +335,8 @@ export default function CartPage() {
                           </button>
                         </div>
                         <div className="text-right">
-                          <p className="text-red-600 font-semibold">${(cartItem.item.price * cartItem.quantity).toFixed(2)}</p>
-                          <p className="text-gray-500 text-xs">${cartItem.item.price.toFixed(2)} each</p>
+                          <p className="text-red-600 font-semibold">रु.{(cartItem.item.price * cartItem.quantity).toFixed(2)}</p>
+                          <p className="text-gray-500 text-xs">रु.{cartItem.item.price.toFixed(2)} each</p>
                         </div>
                       </div>
                     </div>
@@ -365,15 +355,15 @@ export default function CartPage() {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>रु.{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Delivery Fee</span>
-                    <span>${deliveryFee.toFixed(2)}</span>
+                    <span>रु.{deliveryFee.toFixed(2)}</span>
                   </div>
                   <div className="border-t pt-3 flex justify-between font-semibold">
                     <span>Total</span>
-                    <span className="text-red-600">${total.toFixed(2)}</span>
+                    <span className="text-red-600">रु.{total.toFixed(2)}</span>
                   </div>
                 </div>
                 
@@ -622,7 +612,7 @@ export default function CartPage() {
                       Processing...
                     </>
                   ) : (
-                    `Place Order • $${total.toFixed(2)}`
+                    `Place Order • रु.${total.toFixed(2)}`
                   )}
                 </button>
               </div>

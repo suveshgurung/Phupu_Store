@@ -215,7 +215,7 @@ export default function Home() {
                       <div className="p-4 flex flex-col flex-grow">
                         <div className="flex justify-between items-start mb-2">
                           <h3 className="text-lg font-semibold">{item.name}</h3>
-                          <span className="text-red-600 font-medium">${item.price.toFixed(2)}</span>
+                          <span className="text-red-600 font-medium">रु.{item.price.toFixed(2)}</span>
                         </div>
 
                         <p className="text-gray-600 text-sm line-clamp-2 h-10 mb-4">{item.description}</p>
